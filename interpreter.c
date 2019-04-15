@@ -64,6 +64,8 @@ enum ins {
 	I_BL,
 	I_BNL,
 
+	I_RET,
+
 	NO_I,
 };
 
@@ -266,6 +268,10 @@ int main(int argn, char ** args) {
 			break;
 		case I_BNL:
 			memcpy(&pc, pc, sizeof size_t);
+			break;
+		case I_RET:
+			pc = ret.top;
+			ret.top = ret.items[--ret.size];
 			break;
 
 		default:
