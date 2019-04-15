@@ -225,6 +225,20 @@ int main(int argn, char ** args) {
 			memcpy(&sup.top, pc, 4);
 			pc += 4;
 			break;
+
+		case I_ELD:
+			sup.items[sup.size++] = sup.top;
+			sup.top = *((reg *)s.top +  1);
+		case I_LD:
+			s.top = *(reg *)s.top;
+			break;
+		case I_EST:
+			*((reg *)s.top + 1) = sup.top;
+			sup.top = sup.items[--sup.size];
+		case I_ST:
+			*(reg *)s.top = s.items[--s.size];
+			break;
+			
 			
 		case I_GT:
 			s.items[s.size++] = s.top;
