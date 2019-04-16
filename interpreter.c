@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ctype.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
@@ -115,6 +116,7 @@ syscall syscalls[1024] = {
 };
 
 void interpret(STATE) {
+	int base = ret->size;
 	reg tmp = 0, tmp2 = 0;
 	ins *p = *pc;
 	while (p) {
@@ -293,8 +295,12 @@ void interpret(STATE) {
 			memcpy(&p, p, sizeof size_t);
 			break;
 		case I_RET:
-			p = (ins *)ret->top;
-			ret->top = ret->items[--ret->size];
+			if (ret->size == base) {
+				p = 0;
+			} else {
+				p = (ins *)ret->top;
+				ret->top = ret->items[--ret->size];
+			}
 			break;
 
 		default:
@@ -304,16 +310,23 @@ void interpret(STATE) {
 	*pc = p;
 }
 
+#include "forth.c"
+
 int main(int argn, char ** args) {
 	if (argn < 2) {
 		return -1;
 	}
+
+	load_file(args[1]);
+
+	add_word("+", 1, (ins []){I_ADD});
 	
 	stack s = {0};
 	stack ret = {0};
 	ins *pc = (ins []){I_IMM8, 12, I_IMM8, 13, I_ADD, I_SYS, 1, 0, I_SYS, 0, 0};
 	interpret(&pc, &s, &ret);
+	interpreter(&pc, &s, &ret);
 	
-	printf("%d\n", NO_I);
+	printf("%d\n", s.top);
 	return 0;
 }
