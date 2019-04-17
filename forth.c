@@ -13,13 +13,15 @@ enum w_flags {
 word *dict = NULL;
 
 void add_word(char *name, int len, ins *code) {
-	word *w = malloc(sizeof word + sizeof ins * (len + 1));
+	char *n = malloc(strlen(name) + 1);
+	memcpy(n, name, strlen(name) + 1);
+	word *w = malloc(sizeof(word) + sizeof(ins) * (len + 1));
 	*w = (word) {
 		.next = dict,
-		.name = name,
+		.name = n,
 		.len = len,
 	};
-	memcpy(w->code, code, len * sizeof ins);
+	memcpy(w->code, code, len * sizeof(ins));
 	w->code[len] = I_RET;
 	dict = w;
 }
@@ -36,7 +38,7 @@ word *find_word(char *name) {
 	return NULL;
 }
 
-char *file;
+char *file = NULL;
 
 int load_file(char *file_name) {
 	FILE *f = fopen(file_name, "rb");
@@ -56,6 +58,7 @@ int load_file(char *file_name) {
 		fclose(f);
 		return 3;
 	}
+	fi[end] = 0;
 
 	file = fi;
 	fclose(f);
@@ -95,8 +98,9 @@ ins buffer[1024];
 
 void colon(STATE) {
 	pos = 0;
+	char *name = next_word();
 	char *c;
-	while(c = next_word()) {
+	while((c = next_word())) {
 		if (!strcmp(c, ";")) {
 			break;
 		}
@@ -106,13 +110,14 @@ void colon(STATE) {
 			if (w->flags & W_IMMIDIATE) {
 				*pc = w->code;
 				interpret(pc, s, ret);
-			} if (w->flags & W_INLINE) {
-				memcpy(&buffer[pos++], &w->code, w->len);
+			} else if (w->flags & W_INLINE) {
+				memcpy(&buffer[pos], &w->code, w->len);
 				pos += w->len;
 			} else {
 				buffer[pos++] = I_BL;
-				memcpy(&buffer[pos++], &w->code, sizeof size_t);
-				pos += sizeof size_t;
+				void *tmp = &w->code;
+				memcpy(&buffer[pos], &tmp, sizeof(size_t));
+				pos += sizeof(size_t);
 			}
 		} else {
 			size_t l = atol(c);
@@ -121,15 +126,18 @@ void colon(STATE) {
 				buffer[pos++] = l;
 			} else {
 				buffer[pos++] = I_IMMW;
-				memcpy(&buffer[pos++], &l, sizeof size_t);
+				memcpy(&buffer[pos], &l, sizeof(size_t));
+				pos += sizeof(size_t);
 			}
 		}
 	}
+
+	add_word(name, pos, buffer);
 }
 
 void interpreter(STATE) {
 	char *c;
-	while(c = next_word()) {
+	while((c = next_word())) {
 		word *w = find_word(c);
 		if (w) {
 			*pc = w->code;

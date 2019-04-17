@@ -109,11 +109,11 @@ void ffree(STATE) {
 	free((void *)stack_pop(s));
 }
 
+void colon(STATE);
+
 syscall syscalls[1024] = {
 	fexit,
-	test,
-	falloc,
-	ffree,
+	colon,
 };
 
 void interpret(STATE) {
@@ -212,8 +212,8 @@ void interpret(STATE) {
 		case I_IMMW:
 			s->items[s->size++] = s->top;
 			s->top = 0;
-			memcpy(&s->top, p, sizeof size_t);
-			p += sizeof size_t;
+			memcpy(&s->top, p, sizeof(size_t));
+			p += sizeof(size_t);
 			break;
 
 		case I_ELD:
@@ -291,12 +291,12 @@ void interpret(STATE) {
 
 		case I_BL:
 			ret->items[ret->size++] = ret->top;
-			ret->top = (size_t)p + sizeof size_t;
+			ret->top = (size_t)p + sizeof(size_t);
 
-			memcpy(&p, p, sizeof size_t);
+			memcpy(&p, p, sizeof(size_t));
 			break;
 		case I_BNL:
-			memcpy(&p, p, sizeof size_t);
+			memcpy(&p, p, sizeof(size_t));
 			break;
 		case I_RET:
 			if (ret->size == base) {
@@ -350,10 +350,18 @@ int main(int argn, char ** args) {
 	add_word("<", 1, (ins []){I_LT});
 	add_word("=", 1, (ins []){I_EQ});
 	add_word("!=", 1, (ins []){I_NE});
+	add_word(":", 3, (ins []) {I_SYS, 1, 0});
+	ins tmp[1 + sizeof(size_t)] = {I_IMMW};
+	void *ptmp = &pos;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("buffer-pos", 1 + sizeof(size_t), tmp);
+	ptmp = buffer;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("buffer", 1 + sizeof(size_t), tmp);
 	
 	stack s = {0};
 	stack ret = {0};
-	ins *pc = (ins []){I_IMM8, 12, I_IMM8, 13, I_ADD, I_SYS, 1, 0, I_SYS, 0, 0};
+	ins *pc = (ins []){I_IMM8, 12, I_IMM8, 13, I_ADD, I_SYS, 0, 0};
 	interpret(&pc, &s, &ret);
 	interpreter(&pc, &s, &ret);
 	
