@@ -77,6 +77,7 @@ enum ins {
 	I_BGT,
 	I_BZ,
 	I_BNZ,
+	I_B,
 
 	I_BL,
 	I_BNL,
@@ -284,6 +285,9 @@ void interpret(STATE) {
 			else
 				SKIP
 			break;
+		case I_B:
+			BRANCH
+			break;
 
 		case I_BL:
 			ret->items[ret->size++] = ret->top;
@@ -320,6 +324,32 @@ int main(int argn, char ** args) {
 	load_file(args[1]);
 
 	add_word("+", 1, (ins []){I_ADD});
+	add_word("-", 1, (ins []){I_SUB});
+	add_word("lshift", 1, (ins []){I_LSL});
+	add_word("rshift", 1, (ins []){I_LSR});
+	add_word("and", 1, (ins []){I_AND});
+	add_word("or", 1, (ins []){I_OR});
+	add_word("eor", 1, (ins []){I_XOR});
+	add_word("invert", 1, (ins []){I_NOT});
+	add_word("swap", 1, (ins []){I_SWAP});
+	add_word("2swap", 1, (ins []){I_ESWAP});
+	add_word("dup", 1, (ins []){I_DUP});
+	add_word("2dup", 1, (ins []){I_EDUP});
+	add_word("over", 1, (ins []){I_OVER});
+	add_word("2over", 1, (ins []){I_EOVER});
+	add_word("rot", 1, (ins []){I_ROT});
+	add_word("-rot", 1, (ins []){I_NROT});
+	add_word(">r", 1, (ins []){I_TR});
+	add_word("r>", 1, (ins []){I_FR});
+	add_word("0", 1, (ins []){I_ZERO});
+	add_word("!", 1, (ins []){I_LD});
+	add_word("2!", 1, (ins []){I_ELD});
+	add_word("@", 1, (ins []){I_ST});
+	add_word("2@", 1, (ins []){I_EST});
+	add_word(">", 1, (ins []){I_GT});
+	add_word("<", 1, (ins []){I_LT});
+	add_word("=", 1, (ins []){I_EQ});
+	add_word("!=", 1, (ins []){I_NE});
 	
 	stack s = {0};
 	stack ret = {0};
