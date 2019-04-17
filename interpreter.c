@@ -53,7 +53,7 @@ enum ins {
 	// Data
 	I_ZERO,
 	I_IMM8,
-	I_IMM32,
+	I_IMMW,
 
 	I_LD,
 	I_ELD,
@@ -209,11 +209,11 @@ void interpret(STATE) {
 			s->items[s->size++] = s->top;
 			s->top = *(p++);
 			break;
-		case I_IMM32:
+		case I_IMMW:
 			s->items[s->size++] = s->top;
 			s->top = 0;
-			memcpy(&s->top, p, 4);
-			p += 4;
+			memcpy(&s->top, p, sizeof size_t);
+			p += sizeof size_t;
 			break;
 
 		case I_ELD:

@@ -120,8 +120,8 @@ void colon(STATE) {
 				buffer[pos++] = I_IMM8;
 				buffer[pos++] = l;
 			} else {
-				buffer[pos++] = I_IMM32;
-				memcpy(&buffer[pos++], &l, 4);
+				buffer[pos++] = I_IMMW;
+				memcpy(&buffer[pos++], &l, sizeof size_t);
 			}
 		}
 	}
