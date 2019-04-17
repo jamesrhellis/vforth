@@ -284,13 +284,13 @@ void interpret(STATE) {
 				SKIP
 			break;
 		case I_BZ:
-			if (s->items[s->size - 1] == s->top)
+			if (!s->top)
 				BRANCH
 			else
 				SKIP
 			break;
 		case I_BNZ:
-			if (s->items[s->size - 1] != s->top)
+			if (s->top)
 				BRANCH
 			else
 				SKIP
@@ -328,10 +328,10 @@ void interpret(STATE) {
 
 int size_pow(int n) {
 	int c = 0;
-	while (n >> c++) {
+	while (n >> ++c) {
 	}
 
-	return c;
+	return c - 1;
 }
 
 int main(int argn, char ** args) {
@@ -341,6 +341,7 @@ int main(int argn, char ** args) {
 
 	load_file(args[1]);
 
+	// Basic words
 	add_word("+", 1, (ins []){I_ADD}); inlin();
 	add_word("-", 1, (ins []){I_SUB}); inlin();
 	add_word("lshift", 1, (ins []){I_LSL}); inlin();
@@ -360,34 +361,40 @@ int main(int argn, char ** args) {
 	add_word(">r", 1, (ins []){I_TR}); inlin();
 	add_word("r>", 1, (ins []){I_FR}); inlin();
 	add_word("0", 1, (ins []){I_ZERO}); inlin();
-	add_word("c!", 1, (ins []){I_BLD}); inlin();
-	add_word("!", 1, (ins []){I_LD}); inlin();
-	add_word("2!", 1, (ins []){I_ELD}); inlin();
-	add_word("c@", 1, (ins []){I_BST}); inlin();
-	add_word("@", 1, (ins []){I_ST}); inlin();
-	add_word("2@", 1, (ins []){I_EST}); inlin();
+	add_word("c!", 1, (ins []){I_BST}); inlin();
+	add_word("!", 1, (ins []){I_ST}); inlin();
+	add_word("2!", 1, (ins []){I_EST}); inlin();
+	add_word("c@", 1, (ins []){I_BLD}); inlin();
+	add_word("@", 1, (ins []){I_LD}); inlin();
+	add_word("2@", 1, (ins []){I_ELD}); inlin();
 	add_word(">", 1, (ins []){I_GT}); inlin();
 	add_word("<", 1, (ins []){I_LT}); inlin();
 	add_word("=", 1, (ins []){I_EQ}); inlin();
 	add_word("!=", 1, (ins []){I_NE}); inlin();
-	add_word(":", 3, (ins []) {I_SYS, 1, 0}); inlin();
+	add_word("exit", 1, (ins []){I_RET}); inlin();
+	add_word(":", 3, (ins []) {I_SYS, 1, 0});
+
+	// Utility words
 	add_word("w", 3 , (ins []) {I_IMM8, size_pow(sizeof(size_t)), I_LSL}); inlin();
+	add_word("i-b", 2, (ins []) {I_IMM8, I_B}); inlin();
+	add_word("i-bz", 2, (ins []) {I_IMM8, I_BZ}); inlin();
 
 	ins tmp[1 + sizeof(size_t)] = {I_IMMW};
 	void *ptmp = &pos;
 	memcpy(&tmp[1], &ptmp, sizeof(size_t));
 	add_word("buffer", 1 + sizeof(size_t), tmp);
-	ptmp = dict;
+	ptmp = &dict;
 	memcpy(&tmp[1], &ptmp, sizeof(size_t));
 	add_word("dict", 1 + sizeof(size_t), tmp);
+	printf("%d\n", (size_t) &dict);
 
 	add_word("alloc", 3, (ins []) {I_SYS, 2, 0}); inlin();
 	add_word("free", 3, (ins []) {I_SYS, 3, 0}); inlin();
 	
 	stack s = {0};
 	stack ret = {0};
-	ins *pc = (ins []){I_IMM8, 12, I_IMM8, 13, I_ADD, I_SYS, 0, 0};
-	interpret(&pc, &s, &ret);
+	ins *pc = NULL; //(ins []){I_IMM8, 12, I_IMM8, 13, I_ADD, I_SYS, 0, 0};
+	//interpret(&pc, &s, &ret);
 	interpreter(&pc, &s, &ret);
 	
 	printf("%d\n", s.top);

@@ -1,7 +1,8 @@
 typedef struct word {
 	struct word *next;
 	char *name;
-	size_t len, flags;
+	size_t len;
+	size_t flags;
 	ins code[];
 } word;
 
@@ -94,7 +95,7 @@ void push_back(char *word) {
 }
 
 void inlin(void) {
-	dict->flags &= W_IMMIDIATE;
+	dict->flags |= W_INLINE;
 }
 
 size_t pos;
