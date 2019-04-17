@@ -28,6 +28,68 @@ static inline reg stack_pop(stack *s) {
 	return tmp;
 }
 
+char *ins_map[] = {
+	"I_SYS",	// Perform a call to hosting environment
+	// Arithmetic
+	"I_ADD",
+	"I_SUB",
+
+	"I_LSL",
+	"I_LSR",
+
+	// Stack Operations
+	"I_SWAP",
+	"I_ESWAP",
+	"I_DROP",
+	"I_OVER",
+	"I_EOVER",
+	"I_DUP",
+	"I_EDUP",
+	"I_ROT",
+	"I_NROT",
+
+	"I_TR",
+	"I_FR",
+
+	// Data
+	"I_ZERO",
+	"I_IMM8",
+	"I_IMMW",
+
+	"I_BLD",
+	"I_LD",
+	"I_ELD",
+	"I_BST",
+	"I_ST",
+	"I_EST",
+
+	// Binary
+	"I_AND",
+	"I_NOT",
+	"I_OR",
+	"I_XOR",
+
+	// Comparison
+	"I_GT",
+	"I_LT",
+	"I_EQ",
+	"I_NE",
+
+	// Branching
+	"I_BLT",
+	"I_BGT",
+	"I_BZ",
+	"I_BNZ",
+	"I_B",
+
+	"I_BL",
+	"I_BNL",
+
+	"I_RET",
+
+	"NO_I",
+};
+
 enum ins {
 	I_SYS,	// Perform a call to hosting environment
 	// Arithmetic
@@ -40,6 +102,7 @@ enum ins {
 	// Stack Operations
 	I_SWAP,
 	I_ESWAP,
+	I_DROP,
 	I_OVER,
 	I_EOVER,
 	I_DUP,
@@ -144,7 +207,7 @@ void interpret(STATE) {
 			s->top = s->items[--s->size] << s->top;
 			break;
 		case I_LSR:
-			s->top = s->items[--s->size] << s->top;
+			s->top = s->items[--s->size] >> s->top;
 			break;
 
 		case I_ESWAP:
@@ -159,6 +222,10 @@ void interpret(STATE) {
 			tmp = s->top;
 			s->top = s->items[s->size - 1];
 			s->items[s->size - 1] = tmp;
+			break;
+
+		case I_DROP:
+			s->top = s->items[--s->size];
 			break;
 
 		case I_EOVER:
@@ -230,11 +297,16 @@ void interpret(STATE) {
 			break;
 		case I_EST:
 			*((reg *)s->top + 1) = s->items[s->size-2];
+			*(reg *)s->top = s->items[s->size-1];
+			s->top = s->items[(s->size-=3)];
+			break;
 		case I_ST:
 			*(reg *)s->top = s->items[--s->size];
+			s->top = s->items[--s->size];
 			break;
 		case I_BST:
 			*(uint8_t *)s->top = s->items[--s->size];
+			s->top = s->items[--s->size];
 			break;
 			
 			
@@ -352,6 +424,7 @@ int main(int argn, char ** args) {
 	add_word("invert", 1, (ins []){I_NOT}); inlin();
 	add_word("swap", 1, (ins []){I_SWAP}); inlin();
 	add_word("2swap", 1, (ins []){I_ESWAP}); inlin();
+	add_word("drop", 1, (ins []){I_DROP}); inlin();
 	add_word("dup", 1, (ins []){I_DUP}); inlin();
 	add_word("2dup", 1, (ins []){I_EDUP}); inlin();
 	add_word("over", 1, (ins []){I_OVER}); inlin();
@@ -379,14 +452,20 @@ int main(int argn, char ** args) {
 	add_word("i-b", 2, (ins []) {I_IMM8, I_B}); inlin();
 	add_word("i-bz", 2, (ins []) {I_IMM8, I_BZ}); inlin();
 
+	// Forth interpreter state interaction
 	ins tmp[1 + sizeof(size_t)] = {I_IMMW};
 	void *ptmp = &pos;
 	memcpy(&tmp[1], &ptmp, sizeof(size_t));
-	add_word("buffer", 1 + sizeof(size_t), tmp);
+	add_word("buffer-pos", 1 + sizeof(size_t), tmp);
+	ptmp = &buffer;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("buffer-items", 1 + sizeof(size_t), tmp);
 	ptmp = &dict;
 	memcpy(&tmp[1], &ptmp, sizeof(size_t));
 	add_word("dict", 1 + sizeof(size_t), tmp);
-	printf("%d\n", (size_t) &dict);
+	ptmp = &file;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("in-file", 1 + sizeof(size_t), tmp);
 
 	add_word("alloc", 3, (ins []) {I_SYS, 2, 0}); inlin();
 	add_word("free", 3, (ins []) {I_SYS, 3, 0}); inlin();

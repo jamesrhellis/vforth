@@ -1,21 +1,18 @@
 : imm dict @ 3 w + dup @ 1 or swap ! ;
 : inline dict @ 3 w + dup @ 2 or swap ! ;
 
-: buffer-pos buffer ; inline
-: buffer-items buffer 1 w + ;
-
 : buffer-push buffer-items buffer-pos @ + c! buffer-pos @ 1 + buffer-pos ! ;
+: buffer-push24 
+	dup buffer-push 8 rshift dup buffer-push 8 rshift buffer-push ;
 : tail i-b buffer-push
-	buffer-pos @ 0 swap - 
-	dup buffer-push 8 rshift dup buffer-push 8 rshift buffer-push; imm
+	buffer-pos @ 0 swap - buffer-push24 ; imm
+
 : branch-pad 0 buffer-push 0 buffer-push 0 buffer-push ; 
-: branch-write 2dup c! 2dup 1 + c! 2 + c! ;
 : if i-bz buffer-push buffer-pos @ branch-pad ; imm
-: then dup buffer-pos @ swap - swap buffer-items + branch-write ; imm
+: then buffer-pos @ dup >r over - swap r> drop
+	buffer-pos ! buffer-push24 
+	r> buffer-pos ! ; imm
 
 : test 23 24 + ;
 
-: loop-test dup 0 = if drop exit then tail ;
-
-test
-loop-test
+: loop-test dup 0 = if drop drop exit then drop 1 -  ;

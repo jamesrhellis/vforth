@@ -39,7 +39,7 @@ word *find_word(char *name) {
 	return NULL;
 }
 
-char *file = NULL;
+char *file = NULL, *mem = NULL;
 
 int load_file(char *file_name) {
 	FILE *f = fopen(file_name, "rb");
@@ -91,7 +91,7 @@ void push_back(char *word) {
 	if (file) {
 		*(file - 1) = ' ';
 	}
-	file = word;
+	mem = (file = word);
 }
 
 void inlin(void) {
@@ -109,6 +109,7 @@ void colon(STATE) {
 		if (!strcmp(c, ";")) {
 			break;
 		}
+		puts(c);
 
 		word *w = find_word(c);
 		if (w) {
@@ -136,6 +137,13 @@ void colon(STATE) {
 			}
 		}
 	}
+
+		
+	printf("%s: ", name);
+		for (int i = 0;i < pos;++i) {	
+			printf("%s/%d, ", ins_map[buffer[i]], buffer[i]);
+		}
+		puts("");
 
 	add_word(name, pos, buffer);
 }
