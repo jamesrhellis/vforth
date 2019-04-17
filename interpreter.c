@@ -55,8 +55,10 @@ enum ins {
 	I_IMM8,
 	I_IMMW,
 
+	I_BLD,
 	I_LD,
 	I_ELD,
+	I_BST,
 	I_ST,
 	I_EST,
 
@@ -114,6 +116,8 @@ void colon(STATE);
 syscall syscalls[1024] = {
 	fexit,
 	colon,
+	falloc,
+	ffree,
 };
 
 void interpret(STATE) {
@@ -221,10 +225,16 @@ void interpret(STATE) {
 		case I_LD:
 			s->top = *(reg *)s->top;
 			break;
+		case I_BLD:
+			s->top = *(uint8_t *)s->top;
+			break;
 		case I_EST:
 			*((reg *)s->top + 1) = s->items[s->size-2];
 		case I_ST:
 			*(reg *)s->top = s->items[--s->size];
+			break;
+		case I_BST:
+			*(uint8_t *)s->top = s->items[--s->size];
 			break;
 			
 			
@@ -316,6 +326,14 @@ void interpret(STATE) {
 
 #include "forth.c"
 
+int size_pow(int n) {
+	int c = 0;
+	while (n >> c++) {
+	}
+
+	return c;
+}
+
 int main(int argn, char ** args) {
 	if (argn < 2) {
 		return -1;
@@ -323,41 +341,48 @@ int main(int argn, char ** args) {
 
 	load_file(args[1]);
 
-	add_word("+", 1, (ins []){I_ADD});
-	add_word("-", 1, (ins []){I_SUB});
-	add_word("lshift", 1, (ins []){I_LSL});
-	add_word("rshift", 1, (ins []){I_LSR});
-	add_word("and", 1, (ins []){I_AND});
-	add_word("or", 1, (ins []){I_OR});
-	add_word("eor", 1, (ins []){I_XOR});
-	add_word("invert", 1, (ins []){I_NOT});
-	add_word("swap", 1, (ins []){I_SWAP});
-	add_word("2swap", 1, (ins []){I_ESWAP});
-	add_word("dup", 1, (ins []){I_DUP});
-	add_word("2dup", 1, (ins []){I_EDUP});
-	add_word("over", 1, (ins []){I_OVER});
-	add_word("2over", 1, (ins []){I_EOVER});
-	add_word("rot", 1, (ins []){I_ROT});
-	add_word("-rot", 1, (ins []){I_NROT});
-	add_word(">r", 1, (ins []){I_TR});
-	add_word("r>", 1, (ins []){I_FR});
-	add_word("0", 1, (ins []){I_ZERO});
-	add_word("!", 1, (ins []){I_LD});
-	add_word("2!", 1, (ins []){I_ELD});
-	add_word("@", 1, (ins []){I_ST});
-	add_word("2@", 1, (ins []){I_EST});
-	add_word(">", 1, (ins []){I_GT});
-	add_word("<", 1, (ins []){I_LT});
-	add_word("=", 1, (ins []){I_EQ});
-	add_word("!=", 1, (ins []){I_NE});
-	add_word(":", 3, (ins []) {I_SYS, 1, 0});
+	add_word("+", 1, (ins []){I_ADD}); inlin();
+	add_word("-", 1, (ins []){I_SUB}); inlin();
+	add_word("lshift", 1, (ins []){I_LSL}); inlin();
+	add_word("rshift", 1, (ins []){I_LSR}); inlin();
+	add_word("and", 1, (ins []){I_AND}); inlin();
+	add_word("or", 1, (ins []){I_OR}); inlin();
+	add_word("eor", 1, (ins []){I_XOR}); inlin();
+	add_word("invert", 1, (ins []){I_NOT}); inlin();
+	add_word("swap", 1, (ins []){I_SWAP}); inlin();
+	add_word("2swap", 1, (ins []){I_ESWAP}); inlin();
+	add_word("dup", 1, (ins []){I_DUP}); inlin();
+	add_word("2dup", 1, (ins []){I_EDUP}); inlin();
+	add_word("over", 1, (ins []){I_OVER}); inlin();
+	add_word("2over", 1, (ins []){I_EOVER}); inlin();
+	add_word("rot", 1, (ins []){I_ROT}); inlin();
+	add_word("-rot", 1, (ins []){I_NROT}); inlin();
+	add_word(">r", 1, (ins []){I_TR}); inlin();
+	add_word("r>", 1, (ins []){I_FR}); inlin();
+	add_word("0", 1, (ins []){I_ZERO}); inlin();
+	add_word("c!", 1, (ins []){I_BLD}); inlin();
+	add_word("!", 1, (ins []){I_LD}); inlin();
+	add_word("2!", 1, (ins []){I_ELD}); inlin();
+	add_word("c@", 1, (ins []){I_BST}); inlin();
+	add_word("@", 1, (ins []){I_ST}); inlin();
+	add_word("2@", 1, (ins []){I_EST}); inlin();
+	add_word(">", 1, (ins []){I_GT}); inlin();
+	add_word("<", 1, (ins []){I_LT}); inlin();
+	add_word("=", 1, (ins []){I_EQ}); inlin();
+	add_word("!=", 1, (ins []){I_NE}); inlin();
+	add_word(":", 3, (ins []) {I_SYS, 1, 0}); inlin();
+	add_word("w", 3 , (ins []) {I_IMM8, size_pow(sizeof(size_t)), I_LSL}); inlin();
+
 	ins tmp[1 + sizeof(size_t)] = {I_IMMW};
 	void *ptmp = &pos;
 	memcpy(&tmp[1], &ptmp, sizeof(size_t));
-	add_word("buffer-pos", 1 + sizeof(size_t), tmp);
-	ptmp = buffer;
-	memcpy(&tmp[1], &ptmp, sizeof(size_t));
 	add_word("buffer", 1 + sizeof(size_t), tmp);
+	ptmp = dict;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("dict", 1 + sizeof(size_t), tmp);
+
+	add_word("alloc", 3, (ins []) {I_SYS, 2, 0}); inlin();
+	add_word("free", 3, (ins []) {I_SYS, 3, 0}); inlin();
 	
 	stack s = {0};
 	stack ret = {0};

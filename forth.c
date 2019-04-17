@@ -1,7 +1,7 @@
 typedef struct word {
 	struct word *next;
 	char *name;
-	int len, flags;
+	size_t len, flags;
 	ins code[];
 } word;
 
@@ -91,6 +91,10 @@ void push_back(char *word) {
 		*(file - 1) = ' ';
 	}
 	file = word;
+}
+
+void inlin(void) {
+	dict->flags &= W_IMMIDIATE;
 }
 
 size_t pos;
