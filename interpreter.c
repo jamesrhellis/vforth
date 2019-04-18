@@ -251,6 +251,7 @@ void interpret(STATE) {
 		case I_EDUP:
 			s->items[s->size++] = s->top;
 			s->items[s->size] = s->items[s->size - 2];
+			++s->size;
 			break;
 		case I_DUP:
 			s->items[s->size++] = s->top;
@@ -440,6 +441,7 @@ int main(int argn, char ** args) {
 	add_word("swap", 1, (ins []){I_SWAP}); inlin();
 	add_word("2swap", 1, (ins []){I_ESWAP}); inlin();
 	add_word("drop", 1, (ins []){I_DROP}); inlin();
+	add_word("2drop", 2, (ins []){I_DROP, I_DROP}); inlin();
 	add_word("dup", 1, (ins []){I_DUP}); inlin();
 	add_word("2dup", 1, (ins []){I_EDUP}); inlin();
 	add_word("over", 1, (ins []){I_OVER}); inlin();

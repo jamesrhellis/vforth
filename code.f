@@ -26,27 +26,33 @@
 	c@ 0 = if dup in-file ! 1 + swap exit then 
 	0 over c! 1 + dup in-file ! swap ;
 
-: buffer-pushn dup 0 = if drop drop exit then .
+: buffer-pushn dup 0 = if drop drop exit then
 	>r dup buffer-push 8 rshift 
 	r> 1 - tail ;
-: buffer-pushw 1 w . buffer-pushn ;
-: word next-word .
-	i-immw buffer-push buffer-pushw .
-	i-immw buffer-push buffer-pushw . ; imm
+: buffer-pushw 1 w buffer-pushn ;
+: word next-word swap
+	i-immw buffer-push buffer-pushw
+	i-immw buffer-push buffer-pushw ; imm
 
-: head-neq dup c! >r 2swap dup c! r> != ;
-: string-eq 
+: <= > invert ; inline
+: >= < invert ; inline
+
+: head-neq dup c@ >r 2swap dup c@ r> != ;
+: string-eq
 	head-neq if 2drop 2drop 0 exit then
-	1 + 2dup < if 2drop 2drop 1 exit then
+	1 + 2dup <= if 2drop 2drop 1 exit then
 	2swap 1 + tail ;
 : string-eq 2over - >r 2dup - r> != if 0 exit then 
-	2over 2over string-eq ;
+	 2over 2over string-eq ;
 	
 
-: ( word ) next-word string-eq if exit then 2drop tail ; imm
+: ( word ) next-word string-eq if 2drop 2drop exit then 2drop 2drop tail ; imm
 
 ( Now we can have comments )
 
 : test 23 24 + ;
 
-: loop-test dup 0 = if drop drop exit then drop 1 -  ;
+: loop-test dup 0 = if drop exit then . 1 - tail ;
+
+test
+loop-test

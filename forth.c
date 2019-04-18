@@ -109,7 +109,7 @@ void colon(STATE) {
 		if (!strcmp(c, ";")) {
 			break;
 		}
-		puts(c);
+//		puts(c);
 
 		word *w = find_word(c);
 		if (w) {
@@ -139,11 +139,13 @@ void colon(STATE) {
 	}
 
 		
+/*
 	printf("%s: ", name);
-		for (int i = 0;i < pos;++i) {	
-			printf("%s/%d, ", ins_map[buffer[i]], buffer[i]);
-		}
-		puts("");
+	for (int i = 0;i < pos;++i) {	
+		printf("%s/%d, ", ins_map[buffer[i]], buffer[i]);
+	}
+	puts("");
+*/
 
 	add_word(name, pos, buffer);
 }
