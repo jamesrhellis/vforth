@@ -17,13 +17,22 @@
 	over 10 = or 
 	over 9 = or 
 	swap 32 = or ;
+
 : skip-space dup c@ is-space if 1 + tail then ;
 : skip-non-space dup c@ is-space invert if 1 + tail then ;
+
 : next-word skip-space dup skip-non-space ;
-: next-word in-file @ next-word dup 
-	c@ 0 = if drop exit then 
+: next-word in-file @ next-word dup
+	c@ 0 = if dup in-file ! 1 + swap exit then 
 	0 over c! 1 + dup in-file ! swap ;
-: word next-word ; imm
+
+: buffer-pushn dup 0 = if drop drop exit then .
+	>r dup buffer-push 8 rshift 
+	r> 1 - tail ;
+: buffer-pushw 1 w . buffer-pushn ;
+: word next-word .
+	i-immw buffer-push buffer-pushw .
+	i-immw buffer-push buffer-pushw . ; imm
 
 : head-neq dup c! >r 2swap dup c! r> != ;
 : string-eq 
@@ -34,7 +43,7 @@
 	2over 2over string-eq ;
 	
 
-: ( word ) next-word string-eq if exit then tail ; imm
+: ( word ) next-word string-eq if exit then 2drop tail ; imm
 
 ( Now we can have comments )
 
