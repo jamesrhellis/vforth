@@ -313,18 +313,22 @@ void interpret(STATE) {
 		case I_GT:
 			s->items[s->size++] = s->top;
 			s->top = s->items[s->size - 1] < s->items[s->size - 2] ? ~((reg)0) : 0;
+			s->size -= 2;
 			break;
 		case I_LT:
 			s->items[s->size++] = s->top;
 			s->top = s->items[s->size - 1] > s->items[s->size - 2] ? ~((reg)0) : 0;
+			s->size -= 2;
 			break;
 		case I_EQ:
 			s->items[s->size++] = s->top;
 			s->top = s->items[s->size - 1] == s->items[s->size - 2] ? ~((reg)0) : 0;
+			s->size -= 2;
 			break;
 		case I_NE:
 			s->items[s->size++] = s->top;
 			s->top = s->items[s->size - 1] != s->items[s->size - 2] ? ~((reg)0) : 0;
+			s->size -= 2;
 			break;
 
 		case I_AND:
@@ -341,7 +345,7 @@ void interpret(STATE) {
 			break;
 
 		#define SKIP {p += 3;}
-		#define BRANCH {memcpy(&tmp, p, 3); tmp |= tmp & 0x800000 ? ~(reg)0xFFFFFF : 0; p += tmp;}
+		#define BRANCH {tmp = 0; memcpy(&tmp, p, 3); tmp |= tmp & 0x800000 ? ~(reg)0xFFFFFF : 0; p += tmp;}
 
 		case I_BGT:
 			if (s->items[s->size - 1] > s->top)
@@ -360,12 +364,14 @@ void interpret(STATE) {
 				BRANCH
 			else
 				SKIP
+			s->top = s->items[--s->size];
 			break;
 		case I_BNZ:
 			if (s->top)
 				BRANCH
 			else
 				SKIP
+			s->top = s->items[--s->size];
 			break;
 		case I_B:
 			BRANCH
