@@ -499,6 +499,9 @@ int main(int argn, char ** args) {
 	ins *pc = NULL; //(ins []){I_IMM8, 12, I_IMM8, 13, I_ADD, I_SYS, 0, 0};
 	//interpret(&pc, &s, &ret);
 	interpreter(&pc, &s, &ret);
+
+	free_words();
+	free(mem);
 	
 	printf("%d\n", s.top);
 	return 0;

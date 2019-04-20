@@ -62,6 +62,7 @@ int load_file(char *file_name) {
 	fi[end] = 0;
 
 	file = fi;
+	mem = fi;
 	fclose(f);
 	return 0;
 }
@@ -176,4 +177,16 @@ void finclude(STATE) {
 	free(mem);
 	file = bfile;
 	mem = bmem;
+}
+
+void free_words(void) {
+	word *w = dict;
+	while (w) {
+		free(w->name);
+		word *tmp = w;
+		w = w->next;
+		free(tmp);
+	}
+
+	return;
 }
