@@ -165,9 +165,10 @@ void test(STATE) {
 }
 
 void falloc(STATE) {
-	size_t len = s->top;
-	s->top = (size_t) calloc(1, s->top);
-	stack_push(s, s->top + len);
+	size_t len = stack_pop(s);
+	void *m = calloc(1, len);
+	stack_push(s, ((size_t)m) + len);
+	stack_push(s, (size_t) m);
 }
 
 void ffree(STATE) {
@@ -185,6 +186,24 @@ void print_stack(STATE) {
 }
 
 void finclude(STATE);
+
+void ffopen(STATE) {
+	char *fname = (char *)stack_pop(s);
+	char *fflags = (char *)stack_pop(s);
+	FILE *f = fopen(fname, fflags);
+	stack_push(s, (size_t) f);
+}
+
+void ffclose(STATE) {
+	FILE *f = (FILE *)stack_pop(s);
+	fclose(f);
+}
+
+void ffread(STATE) {
+	FILE *f = (FILE *)stack_pop(s);
+	size_t bytes = stack_pop(s);
+	void *t = (void *)stack_pop(s);
+}
 
 syscall syscalls[1024] = {
 	fexit,

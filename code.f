@@ -1,6 +1,9 @@
 : imm dict @ 3 w + dup @ 1 or swap ! ;
 : inline dict @ 3 w + dup @ 2 or swap ! ;
 
+: <= > invert ; inline
+: >= < invert ; inline
+
 : buffer-push buffer-items buffer-pos @ + c! buffer-pos @ 1 + buffer-pos ! ;
 : buffer-push24 
 	dup buffer-push 8 rshift dup buffer-push 8 rshift buffer-push ;
@@ -30,12 +33,14 @@
 	>r dup buffer-push 8 rshift 
 	r> 1 - tail ;
 : buffer-pushw 1 w buffer-pushn ;
-: word next-word swap
+: memcpy 2swap dup c@ >r 2swap r> over c!
+	1 + 2dup <= if 2drop 2drop exit then 
+	2swap 1 + 2dup <= if 2drop 2drop exit then 2swap tail ;
+	
+: string-dup 2dup - alloc 2over 2over memcpy 2swap 2drop ;
+: word next-word string-dup swap
 	i-immw buffer-push buffer-pushw
 	i-immw buffer-push buffer-pushw ; imm
-
-: <= > invert ; inline
-: >= < invert ; inline
 
 : head-neq dup c@ >r 2swap dup c@ r> != ;
 : string-eq
