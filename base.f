@@ -36,6 +36,11 @@
 : memcpy 2swap dup c@ >r 2swap r> over c!
 	1 + 2dup <= if 2drop 2drop exit then 
 	2swap 1 + 2dup <= if 2drop 2drop exit then 2swap tail ;
+
+: memcpy dup 0 = if 2drop exit then 1 - >r
+	dup c@ >r over r> c! r> tail ;
+
+	
 	
 : string-dup 2dup - alloc 2over 2over memcpy 2swap 2drop ;
 : word next-word string-dup swap
@@ -62,14 +67,3 @@
 
 ( Hacky call until I decide how to expose the interpreter to forth )
 : call >r ;
-
-( Impliment the higher level forth in forth )
-: find-word ( word-def word-start end  -- word-ref ) dup >r 1 w + @ ;
-: find-word ( dict word-start end  -- word-ref ) @ find-word ;
-
-: test 23 24 + ;
-
-: loop-test dup 0 = if drop exit then . 1 - tail ;
-
-test
-loop-test
