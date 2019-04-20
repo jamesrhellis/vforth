@@ -50,6 +50,18 @@
 
 ( Now we can have comments )
 
+( Alloc wrappers )
+: valloc ( size -- start end ) alloc ; inline
+: alloc ( size -- start ) alloc swap drop ; inline
+: vfree ( start end -- ) free drop ; inline
+
+( Hacky call until I decide how to expose the interpreter to forth )
+: call >r ;
+
+( Impliment the higher level forth in forth )
+: find-word ( word-def word-start end  -- word-ref ) dup >r 1 w + @ ;
+: find-word ( dict word-start end  -- word-ref ) @ find-word ;
+
 : test 23 24 + ;
 
 : loop-test dup 0 = if drop exit then . 1 - tail ;

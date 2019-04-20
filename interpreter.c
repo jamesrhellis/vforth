@@ -184,12 +184,15 @@ void print_stack(STATE) {
 	puts("");
 }
 
+void finclude(STATE);
+
 syscall syscalls[1024] = {
 	fexit,
 	colon,
 	falloc,
 	ffree,
 	print_stack,
+	finclude,
 };
 
 void interpret(STATE) {
@@ -489,6 +492,7 @@ int main(int argn, char ** args) {
 
 	add_word("alloc", 3, (ins []) {I_SYS, 2, 0}); inlin();
 	add_word("free", 3, (ins []) {I_SYS, 3, 0}); inlin();
+	add_word("in", 3, (ins []) {I_SYS, 5, 0});
 	
 	stack s = {0};
 	stack ret = {0};

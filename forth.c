@@ -97,6 +97,9 @@ void push_back(char *word) {
 void inlin(void) {
 	dict->flags |= W_INLINE;
 }
+void imm(void) {
+	dict->flags |= W_IMMIDIATE;
+}
 
 size_t pos;
 ins buffer[1024];
@@ -161,4 +164,16 @@ void interpreter(STATE) {
 			stack_push(s, atol(c));
 		}
 	}
+}
+
+void finclude(STATE) {
+	char *fname = next_word();
+	char *bfile = file, *bmem = mem;
+	load_file(fname);
+
+	interpreter(pc, s, ret);
+
+	free(mem);
+	file = bfile;
+	mem = bmem;
 }
