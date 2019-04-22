@@ -508,6 +508,9 @@ int main(int argn, char ** args) {
 	ptmp = &file;
 	memcpy(&tmp[1], &ptmp, sizeof(size_t));
 	add_word("in-file", 1 + sizeof(size_t), tmp);
+	ptmp = &var_space;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("var-space", 1 + sizeof(size_t), tmp);
 
 	add_word("alloc", 3, (ins []) {I_SYS, 2, 0}); inlin();
 	add_word("free", 3, (ins []) {I_SYS, 3, 0}); inlin();

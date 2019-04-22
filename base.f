@@ -37,11 +37,6 @@
 	1 + 2dup <= if 2drop 2drop exit then 
 	2swap 1 + 2dup <= if 2drop 2drop exit then 2swap tail ;
 
-: memcpy dup 0 = if 2drop exit then 1 - >r
-	dup c@ >r over r> c! r> tail ;
-
-	
-	
 : string-dup 2dup - alloc 2over 2over memcpy 2swap 2drop ;
 : word next-word string-dup swap
 	i-immw buffer-push buffer-pushw
@@ -67,3 +62,30 @@
 
 ( Hacky call until I decide how to expose the interpreter to forth )
 : call >r ;
+
+
+( Variable Allocation space )
+: var-buffer var-space ;
+: var-pos var-space 1 w + ;
+
+: var-buffer-alloc 128 w alloc var-buffer @ over ! 
+	var-buffer ! 
+	1 w var-pos ! ;
+var-buffer-alloc
+
+: var-alloc var-pos @ dup 128 w >= if var-buffer-alloc drop tail then
+	dup 1 w + var-pos ! var-buffer @ + ;
+
+: n-write ( n dest value ) dup 0 = if drop drop drop exit then
+	1 - >r over over c! swap 8 rshift swap 1 + r> tail ;
+: immw-write ( dest value -- ) i-immw over c! 
+	1 + 1 w n-write ;
+
+: var-word ( name value -- ) 6 5 w + alloc
+	swap over 1 w + ! ( name )
+	1 1 w + over 2 w + ! ( len )
+	swap over 4 w + immw-write 
+	dict @ over ! dict ! inline ;
+
+: var var-alloc next-word string-dup swap drop var-word ;
+: con next-word string-dup swap drop var-word ;

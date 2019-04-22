@@ -29,6 +29,7 @@ void add_word(char *name, int len, ins *code) {
 
 word *find_word(char *name) {
 	word *p = dict;
+	// printf("%d, %d, %d, %d, %d\n", p, p->next, p->name, p->len, p->flags);
 	while (p) {
 		if (!strcmp(p->name, name)) {
 			return p;
@@ -113,7 +114,6 @@ void colon(STATE) {
 		if (!strcmp(c, ";")) {
 			break;
 		}
-//		puts(c);
 
 		word *w = find_word(c);
 		if (w) {
@@ -130,8 +130,16 @@ void colon(STATE) {
 				pos += sizeof(size_t);
 			}
 		} else {
-			size_t l = atol(c);
-			if (l < 256) {
+			char *end;
+			size_t l = strtol(c, &end, 0);
+			if (l == 0) {
+				if (*end) {
+					fprintf(stderr, "Unknown word: %s\n", c);
+					exit(-1);
+				} else {
+					buffer[pos++] = I_ZERO;
+				}
+			} else if (l < 256) {
 				buffer[pos++] = I_IMM8;
 				buffer[pos++] = l;
 			} else {
@@ -142,17 +150,10 @@ void colon(STATE) {
 		}
 	}
 
-		
-/*
-	printf("%s: ", name);
-	for (int i = 0;i < pos;++i) {	
-		printf("%s/%d, ", ins_map[buffer[i]], buffer[i]);
-	}
-	puts("");
-*/
-
 	add_word(name, pos, buffer);
 }
+
+void *var_space[3];
 
 void interpreter(STATE) {
 	char *c;
@@ -162,7 +163,15 @@ void interpreter(STATE) {
 			*pc = w->code;
 			interpret(pc, s, ret);
 		} else {
-			stack_push(s, atol(c));
+			char *end;
+			size_t l = strtol(c, &end, 0);
+			if (l == 0 && *end) {
+				fprintf(stderr, "Unknown word: %s\n", c);
+				exit(-1);
+			} else {
+				stack_push(s, l);
+				
+			}
 		}
 	}
 }
