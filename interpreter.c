@@ -489,10 +489,10 @@ int main(int argn, char ** args) {
 
 	// Utility words
 	add_word("w", 3 , (ins []) {I_IMM8, size_pow(sizeof(size_t)), I_LSL}); inlin();
-	add_word("i-b", 2, (ins []) {I_IMM8, I_B}); inlin();
-	add_word("i-bz", 2, (ins []) {I_IMM8, I_BZ}); inlin();
-	add_word("i-imm8", 2, (ins []) {I_IMM8, I_IMM8}); inlin();
-	add_word("i-immw", 2, (ins []) {I_IMM8, I_IMMW}); inlin();
+
+	for (int i = 0;i < NO_I;++i) {
+		add_word(ins_map[i], 2, (ins []) {I_IMM8, i}); inlin();
+	}
 
 	// Forth interpreter state interaction
 	ins tmp[1 + sizeof(size_t)] = {I_IMMW};

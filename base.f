@@ -7,11 +7,11 @@
 : buffer-push buffer-items buffer-pos @ + c! buffer-pos @ 1 + buffer-pos ! ;
 : buffer-push24 
 	dup buffer-push 8 rshift dup buffer-push 8 rshift buffer-push ;
-: tail i-b buffer-push
+: tail I_B buffer-push
 	buffer-pos @ 0 swap - buffer-push24 ; imm
 
 : branch-pad 0 buffer-push 0 buffer-push 0 buffer-push ; 
-: if i-bz buffer-push buffer-pos @ branch-pad ; imm
+: if I_BZ buffer-push buffer-pos @ branch-pad ; imm
 : then buffer-pos @ dup >r over - swap
 	buffer-pos ! buffer-push24 
 	r> buffer-pos ! ; imm
@@ -39,8 +39,8 @@
 
 : string-dup 2dup - alloc 2over 2over memcpy 2swap 2drop ;
 : word next-word string-dup swap
-	i-immw buffer-push buffer-pushw
-	i-immw buffer-push buffer-pushw ; imm
+	I_IMMW buffer-push buffer-pushw
+	I_IMMW buffer-push buffer-pushw ; imm
 
 : head-neq dup c@ >r 2swap dup c@ r> != ;
 : string-eq
@@ -78,7 +78,7 @@ var-buffer-alloc
 
 : n-write ( n dest value ) dup 0 = if drop drop drop exit then
 	1 - >r over over c! swap 8 rshift swap 1 + r> tail ;
-: immw-write ( dest value -- ) i-immw over c! 
+: immw-write ( dest value -- ) I_IMMW over c! 
 	1 + 1 w n-write ;
 
 : var-word ( name value -- ) 6 5 w + alloc
