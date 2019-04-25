@@ -160,10 +160,6 @@ void fexit(STATE) {
 	*pc = NULL;
 }
 
-void test(STATE) {
-	printf("%d", s->top);
-}
-
 void falloc(STATE) {
 	size_t len = stack_pop(s);
 	void *m = calloc(1, len);
@@ -518,8 +514,7 @@ int main(int argn, char ** args) {
 	
 	stack s = {0};
 	stack ret = {0};
-	ins *pc = NULL; //(ins []){I_IMM8, 12, I_IMM8, 13, I_ADD, I_SYS, 0, 0};
-	//interpret(&pc, &s, &ret);
+	ins *pc = NULL;
 	interpreter(&pc, &s, &ret);
 
 	free_words();

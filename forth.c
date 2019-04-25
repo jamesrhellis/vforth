@@ -29,7 +29,6 @@ void add_word(char *name, int len, ins *code) {
 
 word *find_word(char *name) {
 	word *p = dict;
-	// printf("%d, %d, %d, %d, %d\n", p, p->next, p->name, p->len, p->flags);
 	while (p) {
 		if (!strcmp(p->name, name)) {
 			return p;

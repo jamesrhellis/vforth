@@ -10,6 +10,7 @@ in base.f
 	3 case exit then
 	4 case exit then ;
 
+
 test
 loop-test
 case-test
