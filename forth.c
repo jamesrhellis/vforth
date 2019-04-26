@@ -39,6 +39,18 @@ word *find_word(char *name) {
 	return NULL;
 }
 
+void free_words(void) {
+	word *w = dict;
+	while (w) {
+		free(w->name);
+		word *tmp = w;
+		w = w->next;
+		free(tmp);
+	}
+
+	return;
+}
+
 char *file = NULL, *mem = NULL;
 
 int load_file(char *file_name) {
@@ -187,14 +199,131 @@ void finclude(STATE) {
 	mem = bmem;
 }
 
-void free_words(void) {
-	word *w = dict;
-	while (w) {
-		free(w->name);
-		word *tmp = w;
-		w = w->next;
-		free(tmp);
+void fexit(STATE) {
+	*pc = NULL;
+}
+
+void falloc(STATE) {
+	size_t len = stack_pop(s);
+	void *m = calloc(1, len);
+	stack_push(s, ((size_t)m) + len);
+	stack_push(s, (size_t) m);
+}
+
+void ffree(STATE) {
+	free((void *)stack_pop(s));
+}
+
+void print_stack(STATE) {
+	printf("%zu, ", s->top); 
+	for (int i = s->size -1;i >= 0;--i) {
+		printf("%zu, ", s->items[i]); 
+	}
+	puts("");
+}
+
+void ffopen(STATE) {
+	char *fname = (char *)stack_pop(s);
+	char *fflags = (char *)stack_pop(s);
+	FILE *f = fopen(fname, fflags);
+	stack_push(s, (size_t) f);
+}
+
+void ffclose(STATE) {
+	FILE *f = (FILE *)stack_pop(s);
+	fclose(f);
+}
+
+void ffread(STATE) {
+	FILE *f = (FILE *)stack_pop(s);
+	size_t bytes = stack_pop(s);
+	void *t = (void *)stack_pop(s);
+}
+
+void add_syscall(char *name, syscall s) {
+	int no = syscalls_top++;
+	syscalls[no] = s;
+	add_word(name, 3, (ins []) {I_SYS, no & 0xF, (no >> 8) & 0xF}); 
+}
+
+void add_syscalls() {
+	add_syscall("in", finclude);
+	add_syscall(":", colon);
+	add_syscall(".", print_stack);
+	add_syscall("alloc", falloc); inlin();
+	add_syscall("free", ffree); inlin();
+}
+
+int size_pow(int n) {
+	int c = 0;
+	while (n >> ++c) {
 	}
 
-	return;
+	return c - 1;
+}
+
+void add_base_words() {
+	// Basic words
+	add_word("+", 1, (ins []){I_ADD}); inlin();
+	add_word("-", 1, (ins []){I_SUB}); inlin();
+	add_word("lshift", 1, (ins []){I_LSL}); inlin();
+	add_word("rshift", 1, (ins []){I_LSR}); inlin();
+	add_word("and", 1, (ins []){I_AND}); inlin();
+	add_word("or", 1, (ins []){I_OR}); inlin();
+	add_word("eor", 1, (ins []){I_XOR}); inlin();
+	add_word("invert", 1, (ins []){I_NOT}); inlin();
+	add_word("swap", 1, (ins []){I_SWAP}); inlin();
+	add_word("2swap", 1, (ins []){I_ESWAP}); inlin();
+	add_word("drop", 1, (ins []){I_DROP}); inlin();
+	add_word("2drop", 2, (ins []){I_DROP, I_DROP}); inlin();
+	add_word("dup", 1, (ins []){I_DUP}); inlin();
+	add_word("2dup", 1, (ins []){I_EDUP}); inlin();
+	add_word("over", 1, (ins []){I_OVER}); inlin();
+	add_word("2over", 1, (ins []){I_EOVER}); inlin();
+	add_word("rot", 1, (ins []){I_ROT}); inlin();
+	add_word("-rot", 1, (ins []){I_NROT}); inlin();
+	add_word(">r", 1, (ins []){I_TR}); inlin();
+	add_word("r>", 1, (ins []){I_FR}); inlin();
+	add_word("0", 1, (ins []){I_ZERO}); inlin();
+	add_word("c!", 1, (ins []){I_BST}); inlin();
+	add_word("!", 1, (ins []){I_ST}); inlin();
+	add_word("2!", 1, (ins []){I_EST}); inlin();
+	add_word("c@", 1, (ins []){I_BLD}); inlin();
+	add_word("@", 1, (ins []){I_LD}); inlin();
+	add_word("2@", 1, (ins []){I_ELD}); inlin();
+	add_word(">", 1, (ins []){I_GT}); inlin();
+	add_word("<", 1, (ins []){I_LT}); inlin();
+	add_word("=", 1, (ins []){I_EQ}); inlin();
+	add_word("!=", 1, (ins []){I_NE}); inlin();
+	add_word("exit", 1, (ins []){I_RET}); inlin();
+
+	// Utility words
+	add_word("w", 3 , (ins []) {I_IMM8, size_pow(sizeof(size_t)), I_LSL}); inlin();
+
+	for (int i = 0;i < NO_I;++i) {
+		add_word(ins_map[i], 2, (ins []) {I_IMM8, i}); inlin();
+	}
+
+	// Forth interpreter state interaction
+	ins tmp[1 + sizeof(size_t)] = {I_IMMW};
+	void *ptmp = &pos;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("buffer-pos", 1 + sizeof(size_t), tmp);
+	ptmp = &buffer;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("buffer-items", 1 + sizeof(size_t), tmp);
+	ptmp = &dict;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("dict", 1 + sizeof(size_t), tmp);
+	ptmp = &file;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("in-file", 1 + sizeof(size_t), tmp);
+	ptmp = &var_space;
+	memcpy(&tmp[1], &ptmp, sizeof(size_t));
+	add_word("var-space", 1 + sizeof(size_t), tmp);
+}
+
+void forth_init(void) {
+	add_syscalls();
+	add_base_words();
 }
