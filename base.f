@@ -91,3 +91,6 @@ var-buffer-alloc
 
 : var var-alloc next-word string-dup swap drop var-word ;
 : con next-word string-dup swap drop var-word ;
+
+0 con false
+false invert con true
