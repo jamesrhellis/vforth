@@ -65,7 +65,6 @@
 ( Hacky call until I decide how to expose the interpreter to forth )
 : call >r ;
 
-
 ( Variable Allocation space )
 : var-buffer var-space ;
 : var-pos var-space 1 w + ;
@@ -91,6 +90,3 @@ var-buffer-alloc
 
 : var var-alloc next-word string-dup swap drop var-word ;
 : con next-word string-dup swap drop var-word ;
-
-0 con false
-false invert con true

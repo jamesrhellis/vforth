@@ -396,7 +396,6 @@ int main(int argn, char ** args) {
 
 	free_words();
 	free(mem);
-	
-	printf("%d\n", s.top);
+
 	return 0;
 }
