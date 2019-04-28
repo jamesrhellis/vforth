@@ -89,7 +89,7 @@ char *next_word(void) {
 	}
 
 	char *start = file;
-	while (!isspace(*file)) {
+	while (isgraph(*file)) {
 		++file;
 	}
 
