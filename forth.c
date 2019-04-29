@@ -199,10 +199,6 @@ void finclude(STATE) {
 	mem = bmem;
 }
 
-void fexit(STATE) {
-	*pc = NULL;
-}
-
 void falloc(STATE) {
 	size_t len = stack_pop(s);
 	void *m = calloc(1, len);
@@ -220,24 +216,6 @@ void print_stack(STATE) {
 		printf("%zu, ", s->items[i]); 
 	}
 	puts("");
-}
-
-void ffopen(STATE) {
-	char *fname = (char *)stack_pop(s);
-	char *fflags = (char *)stack_pop(s);
-	FILE *f = fopen(fname, fflags);
-	stack_push(s, (size_t) f);
-}
-
-void ffclose(STATE) {
-	FILE *f = (FILE *)stack_pop(s);
-	fclose(f);
-}
-
-void ffread(STATE) {
-	FILE *f = (FILE *)stack_pop(s);
-	size_t bytes = stack_pop(s);
-	void *t = (void *)stack_pop(s);
 }
 
 void add_syscall(char *name, syscall s) {
