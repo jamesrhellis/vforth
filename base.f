@@ -23,8 +23,10 @@
 	over 9 = or 
 	swap 32 = or ;
 
+: is-not-space dup is-space swap 0 = or invert ;
+
 : skip-space dup c@ is-space if 1 + tail then ;
-: skip-non-space dup c@ is-space invert if 1 + tail then ;
+: skip-non-space dup c@ is-not-space if 1 + tail then ;
 
 : next-word skip-space dup skip-non-space ;
 : next-word in-file @ next-word dup
