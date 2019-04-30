@@ -13,7 +13,6 @@ I(I_DROP),
 I(I_OVER),
 I(I_EOVER),
 I(I_DUP),
-I(I_EDUP),
 I(I_ROT),
 I(I_NROT),
 

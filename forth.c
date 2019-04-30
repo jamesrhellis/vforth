@@ -255,7 +255,7 @@ void add_base_words() {
 	add_word("drop", 1, (ins []){I_DROP}); inlin();
 	add_word("2drop", 2, (ins []){I_DROP, I_DROP}); inlin();
 	add_word("dup", 1, (ins []){I_DUP}); inlin();
-	add_word("2dup", 1, (ins []){I_EDUP}); inlin();
+	add_word("2dup", 2, (ins []){I_OVER,I_OVER}); inlin();
 	add_word("over", 1, (ins []){I_OVER}); inlin();
 	add_word("2over", 1, (ins []){I_EOVER}); inlin();
 	add_word("rot", 1, (ins []){I_ROT}); inlin();

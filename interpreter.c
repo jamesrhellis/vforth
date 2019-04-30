@@ -102,11 +102,6 @@ void interpret(STATE) {
 			s->top = s->items[s->size - 2];
 			break;
 
-		case I_EDUP:
-			s->items[s->size++] = s->top;
-			s->items[s->size] = s->items[s->size - 2];
-			++s->size;
-			break;
 		case I_DUP:
 			s->items[s->size++] = s->top;
 			break;
