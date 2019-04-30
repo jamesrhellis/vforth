@@ -144,12 +144,8 @@ void colon(STATE) {
 			char *end;
 			size_t l = strtol(c, &end, 0);
 			if (l == 0) {
-				if (*end) {
-					fprintf(stderr, "Unknown word: %s\n", c);
-					exit(-1);
-				} else {
-					buffer[pos++] = I_ZERO;
-				}
+				fprintf(stderr, "Unknown word: %s\n", c);
+				exit(-1);
 			} else if (l < 256) {
 				buffer[pos++] = I_IMM8;
 				buffer[pos++] = l;
