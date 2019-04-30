@@ -100,13 +100,6 @@ char *next_word(void) {
 	return start;
 }
 
-void push_back(char *word) {
-	if (file) {
-		*(file - 1) = ' ';
-	}
-	mem = (file = word);
-}
-
 void inlin(void) {
 	dict->flags |= W_INLINE;
 }
