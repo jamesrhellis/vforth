@@ -28,129 +28,17 @@ static inline reg stack_pop(stack *s) {
 	return tmp;
 }
 
+#define I(INS) #INS
 char *ins_map[] = {
-	"I_SYS",	// Perform a call to hosting environment
-	// Arithmetic
-	"I_ADD",
-	"I_SUB",
-
-	"I_LSL",
-	"I_LSR",
-
-	// Stack Operations
-	"I_SWAP",
-	"I_ESWAP",
-	"I_DROP",
-	"I_OVER",
-	"I_EOVER",
-	"I_DUP",
-	"I_EDUP",
-	"I_ROT",
-	"I_NROT",
-
-	"I_TR",
-	"I_FR",
-
-	// Data
-	"I_ZERO",
-	"I_IMM8",
-	"I_IMMW",
-
-	"I_BLD",
-	"I_LD",
-	"I_ELD",
-	"I_BST",
-	"I_ST",
-	"I_EST",
-
-	// Binary
-	"I_AND",
-	"I_NOT",
-	"I_OR",
-	"I_XOR",
-
-	// Comparison
-	"I_GT",
-	"I_LT",
-	"I_EQ",
-	"I_NE",
-
-	// Branching
-	"I_BLT",
-	"I_BGT",
-	"I_BZ",
-	"I_BNZ",
-	"I_B",
-
-	"I_BL",
-	"I_BNL",
-
-	"I_RET",
-
-	"NO_I",
+#include "ins.h"
 };
+#undef I
 
+#define I(INS) INS
 enum ins {
-	I_SYS,	// Perform a call to hosting environment
-	// Arithmetic
-	I_ADD,
-	I_SUB,
-
-	I_LSL,
-	I_LSR,
-
-	// Stack Operations
-	I_SWAP,
-	I_ESWAP,
-	I_DROP,
-	I_OVER,
-	I_EOVER,
-	I_DUP,
-	I_EDUP,
-	I_ROT,
-	I_NROT,
-
-	I_TR,
-	I_FR,
-
-	// Data
-	I_ZERO,
-	I_IMM8,
-	I_IMMW,
-
-	I_BLD,
-	I_LD,
-	I_ELD,
-	I_BST,
-	I_ST,
-	I_EST,
-
-	// Binary
-	I_AND,
-	I_NOT,
-	I_OR,
-	I_XOR,
-
-	// Comparison
-	I_GT,
-	I_LT,
-	I_EQ,
-	I_NE,
-
-	// Branching
-	I_BLT,
-	I_BGT,
-	I_BZ,
-	I_BNZ,
-	I_B,
-
-	I_BL,
-	I_BNL,
-
-	I_RET,
-
-	NO_I,
+#include "ins.h"
 };
+#undef I
 
 #define STATE ins **pc, stack *s, stack *ret
 typedef void (* syscall)(STATE);
