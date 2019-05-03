@@ -119,9 +119,19 @@ var dict 0 !
 	dup >r @ swap dup >r @
 	type-check invert if r> r> r> drop 2drop false exit then
 	r> 1 w + r> 1 w + r> tail ;
-	
-: type-check ( word stack -- ) dup args type-check ;
-: type-check ( word stack -- ) type-check ownership-check ;
+: type-check ( stack word -- ) items swap dup types swap args type-check ;
+
+: type-check ( stack word -- ) 2dup type-check  ownership-check ;
+
+: set-bit ( bit -- bitmap ) 1 swap lshift ;
+: list-ownership-bitmap ( n bitmap list -- bitmap ) 0 = if drop swap drop exit then 1 - >r >r
+	dup @ dup ref-type 
+	2 != if drop r> r> tail then
+	ref set-bit r> and r> tail ;
+: list-ownership-bitmap ( n list -- bitmap ) 0 swap list-ownership-bitmap ;
+: stack-ownership-bitmap ( n stack -- bitmap ) swap items swap 0 swap list-ownership-bitmap ;
+
+: check-ownership ( stack word ) stack-ownership-bitmap swap abs-claim and ;
 
 ( Interpreter words )
 
