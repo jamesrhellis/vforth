@@ -180,7 +180,6 @@ void finclude(STATE) {
 	char *fname = next_word();
 	char *bfile = file, *bmem = mem;
 	load_file(fname);
-	puts(fname);
 
 	interpreter(pc, s, ret);
 

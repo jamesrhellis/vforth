@@ -81,10 +81,10 @@ var-buffer-alloc
 
 : n-write ( n dest value ) dup 0 = if drop drop drop exit then
 	1 - >r over over c! swap 8 rshift swap 1 + r> tail ;
-: immw-write ( dest value -- ) I_IMMW over c! 
-	1 + 1 w n-write ;
+: immw-write ( dest value -- ) I_IMMW over c!
+	1 + dup >r 1 w n-write I_RET r> 1 w + c! ;
 
-: var-word ( name value -- ) 6 5 w + alloc
+: var-word ( name value -- ) 7 5 w + alloc
 	swap over 1 w + ! ( name )
 	1 1 w + over 2 w + ! ( len )
 	swap over 4 w + immw-write 
@@ -92,3 +92,6 @@ var-buffer-alloc
 
 : var var-alloc next-word string-dup swap drop var-word ;
 : con next-word string-dup swap drop var-word ;
+
+0 con false
+false invert con true
