@@ -213,12 +213,30 @@ void add_syscall(char *name, syscall s) {
 	add_word(name, 3, (ins []) {I_SYS, no & 0xF, (no >> 8) & 0xF}); 
 }
 
+#include <dlfcn.h>
+void flibload(STATE) {
+	char *fname = next_word();
+	puts(fname);
+	void *lib = dlopen(fname, RTLD_LAZY | RTLD_GLOBAL);
+	if (!lib) {
+		fprintf(stderr, "Unable to load lib: %s;\n %s\n", fname, dlerror());
+		return;
+	}
+	void *lib_init = dlsym(lib, "lib_init");
+	if (!lib_init) {
+		fprintf(stderr, "Could not get function pointer for %s\n  error is: %s\n\n", "lib_init", dlerror());
+		return;
+	}
+	((void (*)(void(*)(char *, syscall)))lib_init)(add_syscall);
+}
+
 void add_syscalls() {
 	add_syscall("in", finclude);
 	add_syscall(":", colon);
 	add_syscall(".", print_stack);
 	add_syscall("alloc", falloc); inlin();
 	add_syscall("free", ffree); inlin();
+	add_syscall("load", flibload); inlin();
 }
 
 int size_pow(int n) {

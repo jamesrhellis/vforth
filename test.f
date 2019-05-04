@@ -15,3 +15,6 @@ test
 loop-test
 case-test
 
+load ./test_lib.so
+
+c_test
