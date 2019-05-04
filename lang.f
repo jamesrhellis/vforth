@@ -1,3 +1,4 @@
+in base.f
 ( This is a compiler for a higher level concatenative language to the
 	virtual stack machine - 320ne lang )
 ( The higher level language enforces safety by:
@@ -35,7 +36,7 @@
 : args 3 w + ;	( Types of arguements - list )
 : ret 3 w + 1 + ;	( Types of return items )
 : types 4 w + ; ( Combined storage of return and call types )
-: abs-claim 12 w + ;	( Global ownerships claimed - bitset)
+: abs-claim 12 w + ;	( Global ownerships claimed - bitset )
 : rel-claim 13 w + ;	( Ownerships from stack claimed - 8 bit list )
 : height 14 w + ;	( Max height increase of stacks - 8 bit list )
 			( 0 - main , 1 - ret , 2/3 reserved for fp / vec ) 
@@ -43,7 +44,7 @@
 : height-ret 14 w + 1 ;
 : code 15 w + ; 	( Code - bounded pointer )
 
-var dict 0 !
+0 var dict !
 : find ( word? name -- word? ) 0 case swap drop exit then
 	dup >r name> string-eq if 2drop r> exit then
 	drop r> next> tail ;
@@ -87,13 +88,13 @@ var dict 0 !
 : bounded? bounded-mask and 0 != ;
 : >bounded bounded-mask invert and swap bounded-mask and or ;
 
-0 invert 2 lshift invert con ref-type-mask ;
+0 invert 2 lshift invert con ref-type-mask
 : ref-type 13 rshift ref-type-mask and ;
 : >ref-type ref-type-mask 13 rshift invert and swap
 	ref-type-mask and 13 rshift or ;
 
 0 invert 5 lshift invert con ref-mask
-: ref? 15 rshift ref-mask and ;
+: ref 15 rshift ref-mask and ;
 : >ref ref-mask 13 rshift invert and swap
 	ref-mask and 13 rshift or ;
 
@@ -111,18 +112,6 @@ var dict 0 !
 
 ( Type checking )
 
-: norm-ref-type dup ref-type 1 = if 2 >ref-type then ;
-: norm-type 0 >ref norm-ref-type ;
-: type-check ( type type -- equal ) norm-type swap norm-type = ;
-: type-check ( n stack-slice stack-slice -- ) 
-	0 case drop 2drop true exit then 1 - >r
-	dup >r @ swap dup >r @
-	type-check invert if r> r> r> drop 2drop false exit then
-	r> 1 w + r> 1 w + r> tail ;
-: type-check ( stack word -- ) items swap dup types swap args type-check ;
-
-: type-check ( stack word -- ) 2dup type-check  ownership-check ;
-
 : set-bit ( bit -- bitmap ) 1 swap lshift ;
 : list-ownership-bitmap ( n bitmap list -- bitmap ) 0 = if drop swap drop exit then 1 - >r >r
 	dup @ dup ref-type 
@@ -132,9 +121,3 @@ var dict 0 !
 : stack-ownership-bitmap ( n stack -- bitmap ) swap items swap 0 swap list-ownership-bitmap ;
 
 : check-ownership ( stack word ) stack-ownership-bitmap swap abs-claim and ;
-
-( Interpreter words )
-
-: interpret next-word 0 case exit then
-	dict find 0 case ( FIXME ) exit then
-	type-check if ( FIXME ) exit then call tail ;
