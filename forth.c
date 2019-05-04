@@ -216,7 +216,6 @@ void add_syscall(char *name, syscall s) {
 #include <dlfcn.h>
 void flibload(STATE) {
 	char *fname = next_word();
-	puts(fname);
 	void *lib = dlopen(fname, RTLD_LAZY | RTLD_GLOBAL);
 	if (!lib) {
 		fprintf(stderr, "Unable to load lib: %s;\n %s\n", fname, dlerror());
