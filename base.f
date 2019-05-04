@@ -90,7 +90,7 @@ var-buffer-alloc
 	swap over 4 w + immw-write 
 	dict @ over ! dict ! inline ;
 
-: var var-alloc next-word string-dup swap drop var-word ;
+: var var-alloc dup next-word string-dup swap drop var-word ;
 : con next-word string-dup swap drop var-word ;
 
 0 con false
