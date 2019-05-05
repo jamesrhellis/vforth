@@ -55,7 +55,7 @@ in base.f
 
 ( stack format )
 : top ;
-: items 1 w + ;
+: items ;
 
 : ts-pop ( stack -- top ) dup top dup @ dup >r 1 - swap !
 	items r> w + @ ;
@@ -65,6 +65,7 @@ in base.f
 	over ts-push r> swap ts-push ;
 : ts-dup ( stack ) dup items over top @ w + @ swap ts-push ;
 : ts-over ( stack ) dup top @ 1 - w over items @ swap ts-push ;
+: items 1 w + ;
 
 ( Type manipulation words )
 ( type format :
@@ -86,17 +87,17 @@ in base.f
 
 1 12 lshift con bounded-mask
 : bounded? bounded-mask and 0 != ;
-: >bounded bounded-mask invert and swap bounded-mask and or ;
+: >bounded ( to own -- to ) bounded-mask invert and swap bounded-mask and or ;
 
 0 invert 2 lshift invert con ref-type-mask
 : ref-type 13 rshift ref-type-mask and ;
-: >ref-type ref-type-mask 13 rshift invert and swap
-	ref-type-mask and 13 rshift or ;
+: >ref-type ( to type -- to ) ref-type-mask 13 lshift invert and swap
+	ref-type-mask and 13 lshift or ;
 
 0 invert 5 lshift invert con ref-mask
 : ref 15 rshift ref-mask and ;
-: >ref ref-mask 13 rshift invert and swap
-	ref-mask and 13 rshift or ;
+: >ref ( to own -- to ) ref-mask 15 lshift invert and swap
+	ref-mask and 15 lshift or ;
 
 ( Type tracking state )
 
@@ -113,11 +114,12 @@ in base.f
 ( Type checking )
 
 : set-bit ( bit -- bitmap ) 1 swap lshift ;
-: list-ownership-bitmap ( n bitmap list -- bitmap ) 0 = if drop swap drop exit then 1 - >r >r
-	dup @ dup ref-type 
+: list-ownership-bitmap ( n bitmap list -- bitmap ) 
+	. 0 case drop swap drop exit then 1 - >r >r
+	dup 1 w + swap @ dup ref-type 
 	2 != if drop r> r> tail then
-	ref set-bit r> and r> tail ;
-: list-ownership-bitmap ( n list -- bitmap ) 0 swap list-ownership-bitmap ;
-: stack-ownership-bitmap ( n stack -- bitmap ) swap items swap 0 swap list-ownership-bitmap ;
+	ref set-bit . r> . or r> tail ;
+: list-ownership-bitmap ( list n -- bitmap ) swap 0 swap list-ownership-bitmap ;
+: stack-ownership-bitmap ( stack n -- bitmap ) items list-ownership-bitmap ;
 
 : check-ownership ( stack word ) stack-ownership-bitmap swap abs-claim and ;
