@@ -200,9 +200,9 @@ void ffree(STATE) {
 }
 
 void print_stack(STATE) {
-	printf("%zu, ", s->top); 
+	printf("%x, ", s->top); 
 	for (int i = s->size -1;i >= 0;--i) {
-		printf("%zu, ", s->items[i]); 
+		printf("%x, ", s->items[i]); 
 	}
 	puts("");
 }
