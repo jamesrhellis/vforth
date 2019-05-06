@@ -120,7 +120,7 @@ in base.f
 : norm-ref ( type -- normalised-type ) 0 ref> dup ref-type
 	ref-rel case ref-abs >ref-type then ;
 : type-neq ( type type -- neq ) norm-ref swap norm-ref = ;
-: check-types ( n list list )
+: check-types ( n list list -- type-error? )
 	0 case 2drop false exit then >r
 	dup 1 w + >r @ swap
 	dup 1 w + >r @
@@ -135,9 +135,9 @@ in base.f
 	ref-abs case over or r>
 		if swap then over xor 0 != exit then
 	ref-rel case swap rot over or r>
-		if swap then over xor 0 != >r swap r> then
+		if swap then over xor 0 != >r swap r> exit then
 	2drop 0 exit ;
-: check-list-ownership ( n arg-ref-bitmap list abs-bitmap rel-bitmap -- work-or-fail )
+: check-list-ownership ( n arg-ref-bitmap list abs-bitmap rel-bitmap -- ownership-error? )
 	0 case ( SUCCESS ) 4drop false exit then >r ( check end of list )
 	dup 1 rshift >r 1 and 0 !=		( check if ownership taken )
 	swap dup 1 w - >r @		( get item )
