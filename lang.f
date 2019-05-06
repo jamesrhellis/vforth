@@ -117,6 +117,16 @@ in base.f
 
 ( Type checking )
 
+: norm-ref ( type -- normalised-type ) 0 ref> dup ref-type
+	ref-rel case ref-abs >ref-type then ;
+: type-neq ( type type -- neq ) norm-ref swap norm-ref = ;
+: check-types ( n list list )
+	0 case 2drop false exit then >r
+	dup 1 w + >r @ swap
+	dup 1 w + >r @
+	type-neq if >r >r >r 3drop true exit then
+	>r >r >r tail ;
+
 ( Ownership checking )
 
 : set-bit ( bit -- bitmap ) 1 swap lshift ;
