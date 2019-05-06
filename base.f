@@ -96,3 +96,9 @@ var-buffer-alloc
 
 0 con false
 false invert con true
+
+( Extended drop versions )
+: 3drop 2drop drop ; inline
+: 4drop 3drop drop ; inline
+: 5drop 4drop drop ; inline
+
