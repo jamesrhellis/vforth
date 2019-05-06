@@ -15,8 +15,8 @@ in base.f
 		- References cannot be stored
 	- Pointer validity is exposed as a language primative: ?
 		this takes the meaning ' not-valid if drop /code/ then '
-		e.g. : eg array @ 3 + ? 0 exit then @ ;
-		: eg2 optional-owner @@ ? error exit then no-error ;
+		e.g. : eg array @ 3 + ? 0 exit @ ;
+		: eg2 optional-owner @@ ? error exit no-error ;
 	- Language enforced optionals - using the above ? syntax
 )
 
@@ -45,8 +45,8 @@ in base.f
 : code 15 w + ; 	( Code - bounded pointer )
 
 0 var dict !
-: find ( word? name -- word? ) 0 case drop 0 exit then
-	dup >r name> string-eq if 2drop r> exit then
+: find ( word? name -- word? ) 0 case drop 0 exit
+	dup >r name> string-eq if 2drop r> exit
 	drop r> next> tail ;
 
 : store ( dict word -- ) dup >r @ over next ! r> ! ;
@@ -121,10 +121,10 @@ in base.f
 	ref-rel case ref-abs >ref-type then ;
 : type-neq ( type type -- neq ) norm-ref swap norm-ref = ;
 : check-types ( n list list -- type-error? )
-	0 case 2drop false exit then >r
+	0 case 2drop false exit >r
 	dup 1 w + >r @ swap
 	dup 1 w + >r @
-	type-neq if >r >r >r 3drop true exit then
+	type-neq if >r >r >r 3drop true exit
 	>r >r >r tail ;
 
 ( Ownership checking )
@@ -133,14 +133,14 @@ in base.f
 : check-add-ownership ( item add-bit? abs-bitmap rel-bitmap -- conflict? abs-bitmap rel-bitmap )
 	swap >r dup ref set-bit swap ref-type
 	ref-abs case over or r>
-		if swap then over xor 0 != exit then
+		if swap then over xor 0 != exit
 	ref-rel case swap rot over or r>
-		if swap then over xor 0 != >r swap r> exit then
-	2drop 0 exit ;
+		if swap then over xor 0 != >r swap r> exit
+	2drop 0 ;
 : check-list-ownership ( n arg-ref-bitmap list abs-bitmap rel-bitmap -- ownership-error? )
-	0 case ( SUCCESS ) 4drop false exit then >r ( check end of list )
+	0 case ( SUCCESS ) 4drop false exit >r ( check end of list )
 	dup 1 rshift >r 1 and 0 !=		( check if ownership taken )
 	swap dup 1 w - >r @		( get item )
-	check-add-ownership if ( FAIL ) r> r> r> 5drop true exit then
+	check-add-ownership if ( FAIL ) r> r> r> 5drop true exit
 	r> r> r> tail ;
 	
