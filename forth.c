@@ -223,7 +223,7 @@ void flibload(STATE) {
 	}
 	void *lib_init = dlsym(lib, "lib_init");
 	if (!lib_init) {
-		fprintf(stderr, "Could not get function pointer for %s\n  error is: %s\n\n", "lib_init", dlerror());
+		fprintf(stderr, "Unable to initialise lib %s;\n %s\n", lib, dlerror());
 		return;
 	}
 	((void (*)(void(*)(char *, syscall)))lib_init)(add_syscall);
