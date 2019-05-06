@@ -16,7 +16,8 @@
 	buffer-pos ! buffer-push24 
 	r> buffer-pos ! ; imm
 : case I_OVER buffer-push I_EQ buffer-push
-	I_BZ buffer-push buffer-pos @ branch-pad ; imm
+	I_BZ buffer-push buffer-pos @ branch-pad
+	I_DROP buffer-push ; imm
 
 : is-space dup 13 = 
 	over 10 = or 
