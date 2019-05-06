@@ -126,11 +126,11 @@ in base.f
 		if swap then over xor 0 != exit then
 	ref-rel case swap rot over or r>
 		if swap then over xor 0 != >r swap r> then
-	drop drop 0 exit ;
+	2drop 0 exit ;
 : check-list-ownership ( n arg-ref-bitmap list abs-bitmap rel-bitmap -- work-or-fail )
-	0 case ( SUCCESS ) 2drop 2drop false exit then >r ( check end of list )
+	0 case ( SUCCESS ) 4drop false exit then >r ( check end of list )
 	dup 1 rshift >r 1 and 0 !=		( check if ownership taken )
 	swap dup 1 w - >r @		( get item )
-	check-add-ownership if ( FAIL ) r> r> r> drop 2drop 2drop true exit then
+	check-add-ownership if ( FAIL ) r> r> r> 5drop true exit then
 	r> r> r> tail ;
 	
