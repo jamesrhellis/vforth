@@ -88,6 +88,10 @@ char *next_word(void) {
 		++file;
 	}
 
+	if (!*file) {
+		return NULL;
+	}
+
 	char *start = file;
 	while (isgraph(*file)) {
 		++file;
@@ -134,9 +138,9 @@ void colon(STATE) {
 				pos += sizeof(size_t);
 			}
 		} else {
-			char *end;
+			char *end = NULL;
 			size_t l = strtol(c, &end, 0);
-			if (l == 0) {
+			if (*end || l == 0) {
 				fprintf(stderr, "Unknown word: %s\n", c);
 				exit(-1);
 			} else if (l < 256) {
@@ -163,9 +167,9 @@ void interpreter(STATE) {
 			*pc = w->code;
 			interpret(pc, s, ret);
 		} else {
-			char *end;
+			char *end = NULL;
 			size_t l = strtol(c, &end, 0);
-			if (l == 0 && *end) {
+			if (*end || l == 0) {
 				fprintf(stderr, "Unknown word: %s\n", c);
 				exit(-1);
 			} else {
