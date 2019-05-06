@@ -117,10 +117,9 @@ in base.f
 
 ( Type checking )
 
+( Ownership checking )
+
 : set-bit ( bit -- bitmap ) 1 swap lshift ;
-
-: check-abs-ownership ( stack bitmap -- bitmap ) dup top swap items stack-ownership-bitmap and ;
-
 : check-add-ownership ( item add-bit? abs-bitmap rel-bitmap -- conflict? abs-bitmap rel-bitmap )
 	swap >r dup ref set-bit swap ref-type
 	ref-abs case over or r>
