@@ -283,7 +283,6 @@ void add_base_words() {
 	add_word("<", 1, (ins []){I_LT}); inlin();
 	add_word("=", 1, (ins []){I_EQ}); inlin();
 	add_word("!=", 1, (ins []){I_NE}); inlin();
-	add_word("exit", 1, (ins []){I_RET}); inlin();
 
 	// Utility words
 	add_word("w", 3 , (ins []) {I_IMM8, size_pow(sizeof(size_t)), I_LSL}); inlin();

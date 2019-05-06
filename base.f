@@ -18,6 +18,10 @@
 : case I_OVER buffer-push I_EQ buffer-push
 	I_BZ buffer-push buffer-pos @ branch-pad
 	I_DROP buffer-push ; imm
+: exit I_RET buffer-push
+	buffer-pos @ dup >r over - swap
+	buffer-pos ! buffer-push24 
+	r> buffer-pos ! ; imm
 
 : is-space dup 13 = 
 	over 10 = or 
@@ -31,16 +35,16 @@
 
 : next-word skip-space dup skip-non-space ;
 : next-word in-file @ next-word dup
-	c@ 0 = if dup in-file ! 1 + swap exit then 
+	c@ 0 = if dup in-file ! 1 + swap exit 
 	0 over c! 1 + dup in-file ! swap ;
 
-: buffer-pushn dup 0 = if drop drop exit then
+: buffer-pushn dup 0 = if drop drop exit
 	>r dup buffer-push 8 rshift 
 	r> 1 - tail ;
 : buffer-pushw 1 w buffer-pushn ;
 : memcpy 2swap dup c@ >r 2swap r> over c!
-	1 + 2dup <= if 2drop 2drop exit then 
-	2swap 1 + 2dup <= if 2drop 2drop exit then 2swap tail ;
+	1 + 2dup <= if 2drop 2drop exit 
+	2swap 1 + 2dup <= if 2drop 2drop exit 2swap tail ;
 
 : string-dup 2dup - alloc 2over 2over memcpy 2swap 2drop ;
 : word next-word string-dup swap
@@ -49,14 +53,14 @@
 
 : head-neq dup c@ >r 2swap dup c@ r> != ;
 : string-eq
-	head-neq if 2drop 2drop 0 exit then
-	1 + 2dup <= if 2drop 2drop 1 exit then
+	head-neq if 2drop 2drop 0 exit
+	1 + 2dup <= if 2drop 2drop 1 exit
 	2swap 1 + tail ;
-: string-eq 2over - >r 2dup - r> != if 0 exit then 
+: string-eq 2over - >r 2dup - r> != if 0 exit 
 	 2over 2over string-eq ;
 	
 
-: ( word ) next-word string-eq if 2drop 2drop exit then 2drop 2drop tail ; imm
+: ( word ) next-word string-eq if 2drop 2drop exit 2drop 2drop tail ; imm
 
 ( Now we can have comments )
 
@@ -80,7 +84,7 @@ var-buffer-alloc
 : var-alloc var-pos @ dup 128 w >= if var-buffer-alloc drop tail then
 	dup 1 w + var-pos ! var-buffer @ + ;
 
-: n-write ( n dest value ) dup 0 = if drop drop drop exit then
+: n-write ( n dest value ) dup 0 = if drop drop drop exit
 	1 - >r over over c! swap 8 rshift swap 1 + r> tail ;
 : immw-write ( dest value -- ) I_IMMW over c!
 	1 + dup >r 1 w n-write I_RET r> 1 w + c! ;
@@ -101,4 +105,3 @@ false invert con true
 : 3drop 2drop drop ; inline
 : 4drop 3drop drop ; inline
 : 5drop 4drop drop ; inline
-
