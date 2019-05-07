@@ -124,15 +124,15 @@ alloc-stack con if-ret-stack
 
 ( Type checking )
 
-: norm-ref ( type -- normalised-type ) 0 >ref dup ref-type
-	ref-rel case ref-abs >ref-type then ;
-: type-neq ( type type -- neq ) norm-ref swap norm-ref = ;
+: norm-ref ( type -- normalised-type ) 0 swap >ref dup ref-type
+	ref-rel case ref-abs swap >ref-type exit drop ;
+: type-neq ( type type -- neq ) norm-ref swap norm-ref != ;
 : check-types ( n list list -- type-error? )
-	0 case 2drop false exit >r
+	0 case 2drop false exit 1 - >r
 	dup 1 w + >r @ swap
 	dup 1 w + >r @
-	type-neq if >r >r >r 3drop true exit
-	>r >r >r tail ;
+	type-neq if r> r> r> 3drop true exit
+	r> r> r> tail ;
 
 ( Ownership checking )
 
