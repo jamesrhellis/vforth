@@ -10,18 +10,16 @@
 : tail I_B buffer-push
 	buffer-pos @ 0 swap - buffer-push24 ; imm
 
-: branch-pad 0 buffer-push 0 buffer-push 0 buffer-push ; 
-: if I_BZ buffer-push buffer-pos @ branch-pad ; imm
-: then buffer-pos @ dup >r over - swap
-	buffer-pos ! buffer-push24 
-	r> buffer-pos ! ; imm
+: branch-pad 0 buffer-push24 ; 
+: (if) I_BZ buffer-push buffer-pos @ branch-pad ; inline
+: if (if) ; imm
 : case I_OVER buffer-push I_EQ buffer-push
-	I_BZ buffer-push buffer-pos @ branch-pad
-	I_DROP buffer-push ; imm
-: exit I_RET buffer-push
-	buffer-pos @ dup >r over - swap
+	(if) I_DROP buffer-push ; imm
+: (then) buffer-pos @ dup >r over - swap
 	buffer-pos ! buffer-push24 
-	r> buffer-pos ! ; imm
+	r> buffer-pos ! ; inline
+: then (then) ; imm
+: exit I_RET buffer-push (then) ; imm
 
 : is-space dup 13 = 
 	over 10 = or 
@@ -105,3 +103,6 @@ false invert con true
 : 3drop 2drop drop ; inline
 : 4drop 3drop drop ; inline
 : 5drop 4drop drop ; inline
+
+( Add wrapper for & to inline found word address )
+: & & I_IMMW buffer-push buffer-pushw ; imm
