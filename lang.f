@@ -110,18 +110,21 @@ in base.f
 ( Type tracking state )
 
 ( Stack used for tracking types during interpretation )
-17 w alloc con iter-main-stack
-17 w alloc con iter-ret-stack
+16 con stack-size
+stack-size 1 + w con stack-alloc-size
+: alloc-stack stack-size 1 + w alloc ;
+alloc-stack con iter-main-stack
+alloc-stack con iter-ret-stack
 ( Stack used for compiling )
-17 w alloc con comp-main-stack
-17 w alloc con comp-ret-stack
+alloc-stack con comp-main-stack
+alloc-stack con comp-ret-stack
 ( Saved return state for if statements )
-17 w alloc con if-main-stack
-17 w alloc con if-ret-stack
+alloc-stack con if-main-stack
+alloc-stack con if-ret-stack
 
 ( Type checking )
 
-: norm-ref ( type -- normalised-type ) 0 ref> dup ref-type
+: norm-ref ( type -- normalised-type ) 0 >ref dup ref-type
 	ref-rel case ref-abs >ref-type then ;
 : type-neq ( type type -- neq ) norm-ref swap norm-ref = ;
 : check-types ( n list list -- type-error? )
@@ -137,9 +140,9 @@ in base.f
 : check-add-ownership ( item add-bit? abs-bitmap rel-bitmap -- conflict? abs-bitmap rel-bitmap )
 	swap >r dup ref set-bit swap ref-type
 	ref-abs case over or r>
-		if swap then over xor 0 != exit
+		if swap then over eor 0 != exit
 	ref-rel case swap rot over or r>
-		if swap then over xor 0 != >r swap r> exit
+		if swap then over eor 0 != >r swap r> exit
 	2drop 0 ;
 : check-list-ownership ( n arg-ref-bitmap list abs-bitmap rel-bitmap -- ownership-error? )
 	0 case 4drop false exit >r
@@ -148,26 +151,32 @@ in base.f
 	check-add-ownership if r> r> r> 5drop true exit
 	r> r> r> tail ;
 
-( Base functions )
-
 ( Interpreter code )
 
-: own-check ( word ) 0 swap ( rel-bitmap )
+: own-check ( word -- error? ) 0 swap ( rel-bitmap )
 	dup abs-claim @ ( abs-bitmap )
 	swap rel-claim c@ ( arg-ref-bitmap )
 	iter-main-stack 1 ts-pick-ref swap ( list )
 	iter-main-stack top ( n )
 	check-list-ownership ;
 
-: type-check ( word ) 
+: type-check ( word -- error? ) 
 	iter-main-stack over args ts-pick-ref 
 	swap dup types swap args check-types ;
+
+: height-check ( word -- error? )
+	dup height-main iter-main-stack top + 
+	stack-size > if true exit
+	height-ret iter-ret-stack top + 
+	stack-size > if true exit
+	false ;
 
 : call-word ( word ) code call ;
 
 : interpreter-sketch ( )
 	next-word 0 case 2drop exit
 	dict find 0 case ( FIXME ERROR ) exit
+	dup height-check if ( FIXME ERROR ) exit
 	dup type-check if ( FIXME ERROR ) exit
 	dup own-check if ( FIXME ERROR ) exit
 	call-word tail ;
