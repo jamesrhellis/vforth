@@ -10,7 +10,7 @@
 : tail I_B buffer-push
 	buffer-pos @ 0 swap - buffer-push24 ; imm
 
-: branch-pad 0 buffer-push 0 buffer-push 0 buffer-push ; 
+: branch-pad 0 buffer-push24 ; 
 : if I_BZ buffer-push buffer-pos @ branch-pad ; imm
 : then buffer-pos @ dup >r over - swap
 	buffer-pos ! buffer-push24 
