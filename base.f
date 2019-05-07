@@ -11,10 +11,10 @@
 	buffer-pos @ 0 swap - buffer-push24 ; imm
 
 : branch-pad 0 buffer-push24 ; 
-: if I_BZ buffer-push buffer-pos @ branch-pad ; imm
+: (if) I_BZ buffer-push buffer-pos @ branch-pad ; inline
+: if (if) ; imm
 : case I_OVER buffer-push I_EQ buffer-push
-	I_BZ buffer-push buffer-pos @ branch-pad
-	I_DROP buffer-push ; imm
+	(if) I_DROP buffer-push ; imm
 : (then) buffer-pos @ dup >r over - swap
 	buffer-pos ! buffer-push24 
 	r> buffer-pos ! ; inline
