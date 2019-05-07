@@ -12,16 +12,14 @@
 
 : branch-pad 0 buffer-push24 ; 
 : if I_BZ buffer-push buffer-pos @ branch-pad ; imm
-: then buffer-pos @ dup >r over - swap
-	buffer-pos ! buffer-push24 
-	r> buffer-pos ! ; imm
 : case I_OVER buffer-push I_EQ buffer-push
 	I_BZ buffer-push buffer-pos @ branch-pad
 	I_DROP buffer-push ; imm
-: exit I_RET buffer-push
-	buffer-pos @ dup >r over - swap
+: (then) buffer-pos @ dup >r over - swap
 	buffer-pos ! buffer-push24 
-	r> buffer-pos ! ; imm
+	r> buffer-pos ! ; inline
+: then (then) ; imm
+: exit I_RET buffer-push (then) ; imm
 
 : is-space dup 13 = 
 	over 10 = or 
