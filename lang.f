@@ -35,11 +35,14 @@ in base.f
 : >name name ! ;
 : args 3 w + ;	( Types of arguements - list )
 : ret 3 w + 1 + ;	( Types of return items )
-: rel-claim 3 w + 2 + ;	( Ownerships from stack claimed - 8 bit bitmap )
+: rel-claim 3 w + 2 + ;	( Ownerships from stack claimed 
+			  - 8 bit bitmap )
 : types 4 w + ; ( Combined storage of return and call types )
 : abs-claim 12 w + ;	( Global ownerships claimed - bitset )
-: height 14 w + ;	( Max height increase of stacks - 8 bit list )
-			( 0 - main , 1 - ret , 2/3 reserved for fp / vec ) 
+: height 14 w + ;	( Max height increase of stacks 
+			  - 8 bit list )
+			( 0 - main , 1 - ret , 
+			  2/3 reserved for fp / vec ) 
 : height-main 14 w + ; 
 : height-ret 14 w + 1 ;
 : code 15 w + ; 	( Code - bounded pointer )
@@ -65,7 +68,8 @@ in base.f
 	over ts-push r> swap ts-push ;
 : ts-dup ( stack ) dup items over top @ w + @ swap ts-push ;
 : ts-over ( stack ) dup top @ 1 - w over items @ swap ts-push ;
-: ts-pick ( n stack -- item ) over top swap - w swap items + @;
+: ts-pick ( n stack -- item ) over top swap - w swap items + @ ;
+: ts-pick-ref ( n stack -- ref ) over top swap - w swap items + ;
 : items 1 w + ;
 
 ( Type manipulation words )
@@ -138,9 +142,32 @@ in base.f
 		if swap then over xor 0 != >r swap r> exit
 	2drop 0 ;
 : check-list-ownership ( n arg-ref-bitmap list abs-bitmap rel-bitmap -- ownership-error? )
-	0 case ( SUCCESS ) 4drop false exit >r ( check end of list )
-	dup 1 rshift >r 1 and 0 !=		( check if ownership taken )
-	swap dup 1 w - >r @		( get item )
-	check-add-ownership if ( FAIL ) r> r> r> 5drop true exit
+	0 case 4drop false exit >r
+	dup 1 rshift >r 1 and 0 != ( check arg-ref-bitmap )
+	swap dup 1 w - >r @	( get next item )
+	check-add-ownership if r> r> r> 5drop true exit
 	r> r> r> tail ;
-	
+
+( Base functions )
+
+( Interpreter code )
+
+: own-check ( word ) 0 swap ( rel-bitmap )
+	dup abs-claim @ ( abs-bitmap )
+	swap rel-claim c@ ( arg-ref-bitmap )
+	iter-main-stack 1 ts-pick-ref swap ( list )
+	iter-main-stack top ( n )
+	check-list-ownership ;
+
+: type-check ( word ) 
+	iter-main-stack over args ts-pick-ref 
+	swap dup types swap args check-types ;
+
+: call-word ( word ) code call ;
+
+: interpreter-sketch ( )
+	next-word 0 case 2drop exit
+	dict find 0 case ( FIXME ERROR ) exit
+	dup type-check if ( FIXME ERROR ) exit
+	dup own-check if ( FIXME ERROR ) exit
+	call-word tail ;
