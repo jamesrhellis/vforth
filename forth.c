@@ -211,6 +211,20 @@ void print_stack(STATE) {
 	puts("");
 }
 
+void ffind_word(STATE) {
+	char *c = next_word();
+	if (!c) {
+		exit(-1);
+	}
+	word *w = find_word(c);
+	if (!w) {
+		fprintf(stderr, "Unknown word: %s\n", c);
+		exit(-1);
+	}
+	stack_push(s, (size_t)w->code);
+}
+
+
 void add_syscall(char *name, syscall s) {
 	int no = syscalls_top++;
 	syscalls[no] = s;
@@ -240,6 +254,7 @@ void add_syscalls() {
 	add_syscall("alloc", falloc); inlin();
 	add_syscall("free", ffree); inlin();
 	add_syscall("load", flibload); inlin();
+	add_syscall("&", ffind_word);
 }
 
 int size_pow(int n) {

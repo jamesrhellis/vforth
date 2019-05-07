@@ -11,6 +11,7 @@ in base.f
 	4 case exit ;
 
 
+
 test
 loop-test
 case-test
@@ -18,3 +19,6 @@ case-test
 load ./test_lib.so
 
 c_test
+
+: &test & c_test call ;
+&test
