@@ -10,8 +10,6 @@ in base.f
 	3 case exit
 	4 case exit ;
 
-
-
 test
 loop-test
 case-test
@@ -29,3 +27,6 @@ string-test
 
 : num-test 2345 putx 10 putc ;
 num-test
+
+: assert-test 3 2 = " Should be equal" assert ;
+assert-test
