@@ -107,6 +107,12 @@ in base.f
 : >ref ( to own -- to ) ref-mask 15 lshift invert and swap
 	ref-mask and 15 lshift or ;
 
+: print-type ( type ) dup type putx 124 putc
+	dup optional? putx 124 putc
+	dup bounded? putx 124 putc
+	dup ref-type putx 124 putc
+	dup ref putx ;
+
 ( Type tracking state )
 
 ( Stack used for tracking types during interpretation )
@@ -131,7 +137,7 @@ alloc-stack con if-ret-stack
 	0 case 2drop false exit 1 - >r
 	dup 1 w + >r @ swap
 	dup 1 w + >r @
-	type-neq if r> r> r> 3drop true exit
+	type-neq if r> r> r> 2drop ( n is error ) exit
 	r> r> r> tail ;
 
 ( Ownership checking )
@@ -160,23 +166,44 @@ alloc-stack con if-ret-stack
 	iter-main-stack top ( n )
 	check-list-ownership ;
 
+: print-type-list ( n list ) 0 case drop exit 1 - >r
+	dup 1 w + >r @ print-type r> r> tail ;
+
+: type-error ( error word -- ) over name print
+	" : Types do not match: arg " print putx 10 putc
+	iter-main-stack over args ts-pick-ref
+	 over args print-type-list 10 putc
+	dup types swap args print-type-list
+	1 terminate ;
 : type-check ( word -- error? ) 
 	iter-main-stack over args ts-pick-ref 
 	swap dup types swap args check-types ;
 
+: height-error ( error word -- ) over name print
+	" : Word is too high for the " print puts
+	1 case " main stack" puts 
+		" Main stack: " print iter-main-stack top putx
+		" word: " print height-main putx then
+	2 case " return stack" puts
+		" Main stack: " print iter-ret-stack top putx
+		" word: " print height-ret putx then
+	terminate ;
 : height-check ( word -- error? )
 	dup height-main iter-main-stack top + 
-	stack-size > if true exit
+	stack-size > if	1 exit
 	height-ret iter-ret-stack top + 
-	stack-size > if true exit
+	stack-size > if 2 exit
 	false ;
 
 : call-word ( word ) code call ;
 
+: find-error ( name ) " Unable to find word: " print puts
+	1 terminate ;
+
 : interpreter-sketch ( )
-	next-word 0 case 2drop exit
-	dict find 0 case ( FIXME ERROR ) exit
-	dup height-check if ( FIXME ERROR ) exit
-	dup type-check if ( FIXME ERROR ) exit
+	next-word 0 case 2drop exit 2dup
+	dict find 0 case find-error exit rot 2drop
+	dup height-check dup if height-error exit
+	dup type-check dup if type-error exit
 	dup own-check if ( FIXME ERROR ) exit
 	call-word tail ;
