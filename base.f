@@ -106,3 +106,21 @@ false invert con true
 
 ( Add wrapper for & to inline found word address )
 : & & I_IMMW buffer-push buffer-pushw ; imm
+
+( String parsing )
+: skip-to-" dup c@ 
+	0 case exit
+	34 case exit
+	drop 1 + tail ;
+: " in-file @ dup skip-to-" dup dup c@ 
+	0 != if 1 + then in-file !
+	0 over c!
+	I_IMMW buffer-push buffer-pushw 
+	I_IMMW buffer-push buffer-pushw ; imm
+
+( Printing functions )
+
+: print ( string -- ) 2dup <= if 2drop exit
+	dup c@ putc 1 + tail ;
+
+: puts ( string -- ) print 10 putc ;
