@@ -140,3 +140,6 @@ false invert con true
 : putx ( number -- ) 0 case char 0 putc exit
 	dup hex-shift if putx exit
 	4 lshift tail ;
+
+( Testing facilities )
+: assert ( string cond ) rot 0 = if puts 1 terminate then ;
