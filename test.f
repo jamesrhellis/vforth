@@ -22,3 +22,10 @@ c_test
 
 : &test & c_test call ;
 &test
+
+
+: string-test " test!" puts ;
+string-test
+
+: num-test 2345 putx 10 putc ;
+num-test
