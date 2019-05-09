@@ -79,8 +79,10 @@ in base.f
 	12 bounded? ; is this a ref / own to an array
 	13-14 ref-type : 0 -> not a ref, 1 -> ref to stack item,
 		2 -> ref to global item, 3 -> ownership
-	15-20 ref? ; what object is this a ref of / 0 -> own > ref
-	21 mark	; used for marking value in compiler
+	15-20 ref ; what object is this a ref of / 0 -> own > ref
+	21 owner? ; is this value an owner - or in the 
+			case of a ref, a ref to the owner
+	
 )
 	
 0 invert 10 lshift invert con type-mask
@@ -96,8 +98,8 @@ in base.f
 : >bounded ( to own -- to ) bounded-mask invert and swap bounded-mask and or ;
 
 0 invert 2 lshift invert con ref-type-mask
+1 con ref-rel
 2 con ref-abs
-3 con ref-rel
 : ref-type 13 rshift ref-type-mask and ;
 : >ref-type ( to type -- to ) ref-type-mask 13 lshift invert and swap
 	ref-type-mask and 13 lshift or ;
@@ -106,6 +108,10 @@ in base.f
 : ref 15 rshift ref-mask and ;
 : >ref ( to own -- to ) ref-mask 15 lshift invert and swap
 	ref-mask and 15 lshift or ;
+
+1 21 lshift con owner-mask
+: owner? owner-mask and 0 != ;
+: >owner ( to own -- to ) owner-mask invert and swap owner-mask and or ;
 
 : print-type ( type ) dup type putx 124 putc
 	dup optional? putx 124 putc
