@@ -165,6 +165,7 @@ alloc-stack con if-ret-stack
 
 ( Interpreter code )
 
+: own-error ( ) " Ownership error!" puts 1 terminate ;
 : own-check ( word -- error? ) 0 swap ( rel-bitmap )
 	dup abs-claim @ ( abs-bitmap )
 	swap rel-claim c@ ( arg-ref-bitmap )
@@ -211,5 +212,5 @@ alloc-stack con if-ret-stack
 	dict find 0 case find-error exit rot 2drop
 	dup height-check dup if height-error exit
 	dup type-check dup if type-error exit
-	dup own-check if ( FIXME ERROR ) exit
+	dup own-check if own-error exit
 	call-word tail ;
