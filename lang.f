@@ -45,7 +45,8 @@ in base.f
 			  2/3 reserved for fp / vec ) 
 : height-main 14 w + ; 
 : height-ret 14 w + 1 ;
-: code 15 w + ; 	( Code - bounded pointer )
+: type-check-code 15 w + ; ( Code to determine type checking )
+: code 16 w + ; 	( Code - bounded pointer )
 
 0 var dict !
 : find ( word? name -- word? ) 0 case drop 0 exit
@@ -134,6 +135,46 @@ alloc-stack con comp-ret-stack
 alloc-stack con if-main-stack
 alloc-stack con if-ret-stack
 
+( Basic words )
+( Basic words need to be generic, and may produce different
+  code depending on the width of types, so need custom
+  type handling )
+: type-width ( type -- width ) bounded? if 2 exit 1 ;
+
+: 12swap ( a 2b - 2b a ) rot ;
+: 21swap ( 2b a - a 2b ) -rot ;
+: check-swap ( main-stack return-stack -- error? code )
+	dup ts-swap dup 2 ts-pick type-width
+	1 case dup 1 ts-pick type-width
+		1 case 2drop & swap false exit
+		2 case 2drop & 12swap false exit exit
+	2 case dup 1 ts-pick type-width
+		1 case 2drop & 21swap false exit
+		2 case 2drop & 2swap false exit exit ;
+
+: check-dup ( main-stack return-stack -- error? code )
+	dup ts-dup dup 1 ts-pick type-width 
+	1 case 2drop & dup false exit
+	2 case 2drop & 2dup false exit ;
+
+: 12over ( a 2b -- 2b a 2b ) >r 2dup r> rot ;
+: 21over ( 2b a -- a 2b a ) -rot dup >r rot r> ;
+: check-over ( main-stack return-stack -- error? code )
+	dup ts-over dup 2 ts-pick type-width
+	1 case dup 1 ts-pick type-width
+		1 case 2drop & over false exit
+		2 case 2drop & 12over false exit exit
+	2 case dup 1 ts-pick type-width
+		1 case 2drop & 21over false exit
+		2 case 2drop & 2over false exit exit ;
+
+: check-drop ( main-stack return-stack -- error? code )
+	dup ts-pop type-width
+	1 case 2drop & drop false exit
+	2 case 2drop & 2drop false exit ;
+
+
+( Default type checking code )
 ( Type checking )
 
 : norm-ref ( type -- normalised-type ) 0 swap >ref dup ref-type
@@ -163,7 +204,7 @@ alloc-stack con if-ret-stack
 	check-add-ownership if r> r> r> 5drop true exit
 	r> r> r> tail ;
 
-( Interpreter code )
+( Interpreter wrappers )
 
 : own-error ( ) " Ownership error!" puts 1 terminate ;
 : own-check ( word -- error? ) 0 swap ( rel-bitmap )
@@ -207,10 +248,16 @@ alloc-stack con if-ret-stack
 : find-error ( name ) " Unable to find word: " print puts
 	1 terminate ;
 
-: interpreter-sketch ( )
-	next-word 0 case 2drop exit 2dup
-	dict find 0 case find-error exit rot 2drop
+: default-type-check ( word  -- error? code )
 	dup height-check dup if height-error exit
 	dup type-check dup if type-error exit
 	dup own-check if own-error exit
+	code false ;
+
+( Interpreter code )
+
+: interpreter-sketch ( )
+	next-word 0 case 2drop exit 2dup
+	dict find 0 case find-error exit rot 2drop
+	word-call-test if exit
 	call-word tail ;
