@@ -180,18 +180,6 @@ void interpreter(STATE) {
 	}
 }
 
-void finclude(STATE) {
-	char *fname = next_word();
-	char *bfile = file, *bmem = mem;
-	load_file(fname);
-
-	interpreter(pc, s, ret);
-
-	free(mem);
-	file = bfile;
-	mem = bmem;
-}
-
 void falloc(STATE) {
 	size_t len = stack_pop(s);
 	void *m = calloc(1, len);
@@ -241,21 +229,7 @@ void add_syscall(char *name, syscall s) {
 	add_word(name, 3, (ins []) {I_SYS, no & 0xF, (no >> 8) & 0xF}); 
 }
 
-#include <dlfcn.h>
-void flibload(STATE) {
-	char *fname = next_word();
-	void *lib = dlopen(fname, RTLD_LAZY | RTLD_GLOBAL);
-	if (!lib) {
-		fprintf(stderr, "Unable to load lib: %s;\n %s\n", fname, dlerror());
-		return;
-	}
-	void *lib_init = dlsym(lib, "lib_init");
-	if (!lib_init) {
-		fprintf(stderr, "Unable to initialise lib %s;\n %s\n", lib, dlerror());
-		return;
-	}
-	((void (*)(void(*)(char *, syscall)))lib_init)(add_syscall);
-}
+#include "forth_modules.c"
 
 void add_syscalls() {
 	add_syscall("in", finclude);
