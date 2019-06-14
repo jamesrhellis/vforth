@@ -21,7 +21,6 @@ c_test
 : &test & c_test call ;
 &test
 
-
 : string-test " test!" puts ;
 string-test
 
