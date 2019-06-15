@@ -63,9 +63,9 @@
 ( Now we can have comments )
 
 ( Alloc wrappers )
-: valloc ( size -- start end ) alloc ; inline
+: valloc ( size -- end start ) alloc ; inline
 : alloc ( size -- start ) alloc swap drop ; inline
-: vfree ( start end -- ) free drop ; inline
+: vfree ( end start -- ) free drop ; inline
 
 ( Hacky call until I decide how to expose the interpreter to forth )
 : call >r ;
@@ -82,12 +82,12 @@ var-buffer-alloc
 : var-alloc var-pos @ dup 128 w >= if var-buffer-alloc drop tail then
 	dup 1 w + var-pos ! var-buffer @ + ;
 
-: n-write ( n dest value ) dup 0 = if drop drop drop exit
+: n-write ( value dest n ) dup 0 = if drop drop drop exit
 	1 - >r over over c! swap 8 rshift swap 1 + r> tail ;
 : immw-write ( dest value -- ) I_IMMW over c!
 	1 + dup >r 1 w n-write I_RET r> 1 w + c! ;
 
-: var-word ( name value -- ) 7 5 w + alloc
+: var-word ( value name -- ) 7 5 w + alloc
 	swap over 1 w + ! ( name )
 	1 1 w + over 2 w + ! ( len )
 	swap over 4 w + immw-write 
@@ -142,4 +142,4 @@ false invert con true
 	4 lshift tail ;
 
 ( Testing facilities )
-: assert ( string cond ) rot 0 = if puts 1 terminate then ;
+: assert ( cond string ) rot 0 = if puts 1 terminate then ;
