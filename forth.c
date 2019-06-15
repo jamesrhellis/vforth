@@ -1,6 +1,7 @@
 typedef struct word {
 	struct word *next;
 	char *name;
+	char *name_end;
 	size_t len;
 	size_t flags;
 	ins code[];
@@ -20,6 +21,7 @@ void add_word(char *name, int len, ins *code) {
 	*w = (word) {
 		.next = dict,
 		.name = n,
+		.name_end = strlen(name) + name,
 		.len = len,
 	};
 	memcpy(w->code, code, len * sizeof(ins));
