@@ -25,7 +25,6 @@
 	over 10 = or 
 	over 9 = or 
 	swap 32 = or ;
-
 : is-not-space dup is-space swap 0 = or invert ;
 
 : skip-space dup c@ is-space if 1 + tail then ;
@@ -54,7 +53,7 @@
 	head-neq if 2drop 2drop 0 exit
 	1 + 2dup <= if 2drop 2drop 1 exit
 	2swap 1 + tail ;
-: string-eq 2over - >r 2dup - r> != if 0 exit 
+: string-eq 2over - >r 2dup - r> != if 2drop 2drop 0 exit 
 	 string-eq ;
 	
 
@@ -113,5 +112,3 @@ false invert con true
 	I_IMMW buffer-push buffer-pushw 
 	I_IMMW buffer-push buffer-pushw ; imm
 
-( Testing facilities )
-: assert ( cond string ) rot 0 = if puts 1 terminate then ;
