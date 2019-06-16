@@ -12,6 +12,7 @@ in io.f
 : word-flags 4 w + ;		( immediate 0, inline 1 )
 : word-code 5 w + ;		( executable intructions inline )
 
+( Find word )
 : dict-find ( name word? -- name word? ) 0 case 0 exit
 	dup >r
 	word-name 2! 2over string-eq if r> exit
@@ -21,7 +22,10 @@ in io.f
 ( Postpone equivilent )
 : ' next-word dict-find
 	0 case " Unable to find word: " print puts 1 terminate exit
-	code I_CALL buffer-push buffer-pushw 2drop ; 
+	word-code I_CALL buffer-push buffer-pushw 2drop ; 
 
-( Add wrapper for & to inline found word address )
-: & & I_IMMW buffer-push buffer-pushw ; imm
+
+( Get address of word )
+: & next-word dict-find 
+	0 case " Unable to find word: " print puts 1 terminate exit
+	word-code I_IMMW buffer-push buffer-pushw 2drop ; 
