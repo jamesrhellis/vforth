@@ -55,10 +55,10 @@
 	1 + 2dup <= if 2drop 2drop 1 exit
 	2swap 1 + tail ;
 : string-eq 2over - >r 2dup - r> != if 0 exit 
-	 2over 2over string-eq ;
+	 string-eq ;
 	
 
-: ( word ) next-word string-eq if 2drop 2drop exit 2drop 2drop tail ; imm
+: ( word ) next-word string-eq if exit tail ; imm
 
 ( Now we can have comments )
 
