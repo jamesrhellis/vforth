@@ -1,5 +1,6 @@
 in base.f
 in io.f
+in meta.f
 
 : test 23 24 + ;
 

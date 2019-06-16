@@ -56,7 +56,9 @@ int load_forth_file(char *file_name, STATE) {
 
 void finclude(STATE) {
 	char *fname = next_word();
-	load_forth_file(fname, pc, s, ret);
+	char buffer[256] = "./fsrc/";
+	strcat(buffer + strlen(buffer), fname);
+	load_forth_file(buffer, pc, s, ret);
 }
 
 #include <dlfcn.h>

@@ -24,7 +24,7 @@ in io.f
 
 ( Postpone equivilent )
 : ' next-word dict-find-or-fail
-	word-code I_CALL buffer-push buffer-pushw 2drop ; 
+	word-code I_BL buffer-push buffer-pushw 2drop ; 
 
 ( Get address of word )
 : & next-word dict-find-or-fail
