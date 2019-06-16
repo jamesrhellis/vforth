@@ -21,7 +21,7 @@ void add_word(char *name, int len, ins *code) {
 	*w = (word) {
 		.next = dict,
 		.name = n,
-		.name_end = strlen(name) + name,
+		.name_end = strlen(n) + n,
 		.len = len,
 	};
 	memcpy(w->code, code, len * sizeof(ins));

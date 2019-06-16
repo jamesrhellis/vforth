@@ -1,4 +1,6 @@
 in base.f
+in io.f
+
 : test 23 24 + ;
 
 : loop-test dup 0 = if drop exit . 1 - tail ;
