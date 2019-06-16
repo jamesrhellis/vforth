@@ -1,5 +1,5 @@
-: imm dict @ 3 w + dup @ 1 or swap ! ;
-: inline dict @ 3 w + dup @ 2 or swap ! ;
+: imm dict @ 4 w + dup @ 1 or swap ! ;
+: inline dict @ 4 w + dup @ 2 or swap ! ;
 
 : <= > invert ; inline
 : >= < invert ; inline
@@ -25,7 +25,6 @@
 	over 10 = or 
 	over 9 = or 
 	swap 32 = or ;
-
 : is-not-space dup is-space swap 0 = or invert ;
 
 : skip-space dup c@ is-space if 1 + tail then ;
@@ -54,11 +53,10 @@
 	head-neq if 2drop 2drop 0 exit
 	1 + 2dup <= if 2drop 2drop 1 exit
 	2swap 1 + tail ;
-: string-eq 2over - >r 2dup - r> != if 0 exit 
-	 2over 2over string-eq ;
-	
+: string-eq 2over - >r 2dup - r> != if 2drop 2drop 0 exit 
+	 string-eq ;
 
-: ( word ) next-word string-eq if 2drop 2drop exit 2drop 2drop tail ; imm
+: ( word ) next-word string-eq if exit tail ; imm
 
 ( Now we can have comments )
 
@@ -87,25 +85,17 @@ var-buffer-alloc
 : immw-write ( dest value -- ) I_IMMW over c!
 	1 + dup >r 1 w n-write I_RET r> 1 w + c! ;
 
-: var-word ( value name -- ) 7 5 w + alloc
-	swap over 1 w + ! ( name )
-	1 1 w + over 2 w + ! ( len )
-	swap over 4 w + immw-write 
+: var-word ( value name -- ) 7 6 w + alloc dup >r
+	1 w + 2! ( name )
+	r> 1 1 w + over 3 w + ! ( len )
+	swap over 5 w + immw-write  ( code )
 	dict @ over ! dict ! inline ;
 
-: var var-alloc dup next-word string-dup swap drop var-word ;
-: con next-word string-dup swap drop var-word ;
+: var var-alloc dup next-word string-dup var-word ;
+: con next-word string-dup var-word ;
 
 0 con false
 false invert con true
-
-( Extended drop versions )
-: 3drop 2drop drop ; inline
-: 4drop 3drop drop ; inline
-: 5drop 4drop drop ; inline
-
-( Add wrapper for & to inline found word address )
-: & & I_IMMW buffer-push buffer-pushw ; imm
 
 ( String parsing )
 : skip-to-" dup c@ 
@@ -118,28 +108,3 @@ false invert con true
 	I_IMMW buffer-push buffer-pushw 
 	I_IMMW buffer-push buffer-pushw ; imm
 
-( Printing functions )
-
-: print ( string -- ) 2dup <= if 2drop exit
-	dup c@ putc 1 + tail ;
-
-: puts ( string -- ) print 10 putc ;
-
-: char in-file @ dup c@ swap 1 + in-file ! 
-	I_IMM8 buffer-push buffer-push ; imm
-
-1 w 3 lshift 4 - con hex-shift
-: hex-shift ( number -- number ) hex-shift rshift ;
-: hex-char ( number ) 
-	dup 9 > if 10 - char a + exit
-	char 0 + ;
-: putx ( number -- ) 0 case exit
-	dup hex-shift hex-char putc
-	4 lshift tail ; 
-( This is an outer loop to skip leading zeros )
-: putx ( number -- ) 0 case char 0 putc exit
-	dup hex-shift if putx exit
-	4 lshift tail ;
-
-( Testing facilities )
-: assert ( cond string ) rot 0 = if puts 1 terminate then ;

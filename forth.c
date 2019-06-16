@@ -1,6 +1,7 @@
 typedef struct word {
 	struct word *next;
 	char *name;
+	char *name_end;
 	size_t len;
 	size_t flags;
 	ins code[];
@@ -20,6 +21,7 @@ void add_word(char *name, int len, ins *code) {
 	*w = (word) {
 		.next = dict,
 		.name = n,
+		.name_end = strlen(n) + n,
 		.len = len,
 	};
 	memcpy(w->code, code, len * sizeof(ins));
@@ -199,19 +201,6 @@ void print_stack(STATE) {
 	puts("");
 }
 
-void ffind_word(STATE) {
-	char *c = next_word();
-	if (!c) {
-		exit(-1);
-	}
-	word *w = find_word(c);
-	if (!w) {
-		fprintf(stderr, "Unknown word: %s\n", c);
-		exit(-1);
-	}
-	stack_push(s, (size_t)w->code);
-}
-
 void fexit(STATE) {
 	exit(stack_pop(s));
 }
@@ -238,7 +227,6 @@ void add_syscalls() {
 	add_syscall("alloc", falloc); inlin();
 	add_syscall("free", ffree); inlin();
 	add_syscall("load", flibload); inlin();
-	add_syscall("&", ffind_word);
 	add_syscall("terminate", fexit);
 	add_syscall("putc", fputchar);
 	add_syscall("getc", fgetchar);
