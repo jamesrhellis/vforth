@@ -104,9 +104,6 @@ false invert con true
 : 4drop 3drop drop ; inline
 : 5drop 4drop drop ; inline
 
-( Add wrapper for & to inline found word address )
-: & & I_IMMW buffer-push buffer-pushw ; imm
-
 ( String parsing )
 : skip-to-" dup c@ 
 	0 case exit
