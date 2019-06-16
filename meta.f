@@ -19,13 +19,13 @@ in io.f
 	r> word-next tail ;
 : dict-find ( name -- name word? ) dict @ dict-find ; 
 
+: dict-find-or-fail ( name -- name word ) dict-find
+	0 case " Unable to find word: " print puts 1 terminate exit ;
+
 ( Postpone equivilent )
-: ' next-word dict-find
-	0 case " Unable to find word: " print puts 1 terminate exit
+: ' next-word dict-find-or-fail
 	word-code I_CALL buffer-push buffer-pushw 2drop ; 
 
-
 ( Get address of word )
-: & next-word dict-find 
-	0 case " Unable to find word: " print puts 1 terminate exit
+: & next-word dict-find-or-fail
 	word-code I_IMMW buffer-push buffer-pushw 2drop ; 
