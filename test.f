@@ -27,7 +27,7 @@ string-test
 : &test & c_test call ;
 &test
 
-: num-test 2345 putx 10 putc ;
+: num-test 32 putx 10 putc ;
 num-test
 
 : assert-test 3 2 = " Should be equal" assert ;

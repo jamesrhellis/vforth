@@ -12,18 +12,16 @@ in base.f
 : char in-file @ dup c@ swap 1 + in-file ! 
 	I_IMM8 buffer-push buffer-push ; imm
 
-1 w 3 lshift 4 - con hex-shift
-: hex-shift ( number -- number ) hex-shift rshift ;
-: hex-char ( number ) 
-	dup 9 > if 10 - char a + exit
-	char 0 + ;
-: putx ( number -- ) 0 case exit
-	dup hex-shift hex-char putc
-	4 lshift tail ; 
-( This is an outer loop to skip leading zeros )
-: putx ( number -- ) 0 case char 0 putc exit
-	dup hex-shift if putx exit
-	4 lshift tail ;
+: hex-char ( no -- char ) dup 10 < if char 0 + exit
+	10 - char a + ;
+15 con hex-mask
+: hex-mask hex-mask and ;
+: putx ( number shift -- ) 0 case drop exit
+	4 - over over rshift hex-mask hex-char putc tail ;
+( outer loop to skip leading zeros )
+: putx ( number shift ) 0 case char 0 putc exit
+	4 - over over rshift hex-mask if 4 + putx exit tail ;
+: putx ( number -- ) 8 w putx ;
 
 ( Testing facilities )
 : assert ( cond string ) rot 0 = if puts 1 terminate then ;
