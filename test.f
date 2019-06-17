@@ -21,11 +21,11 @@ load ./test_lib.so
 
 c_test
 
-: &test & c_test call ;
-&test
-
 : string-test " test!" puts ;
 string-test
+
+: &test & c_test call ;
+&test
 
 : num-test 2345 putx 10 putc ;
 num-test

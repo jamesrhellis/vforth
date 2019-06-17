@@ -15,8 +15,8 @@ in io.f
 ( Find word )
 : dict-find ( name word? -- name word? ) 0 case 0 exit
 	dup >r
-	word-name 2! 2over string-eq if r> exit
-	r> word-next tail ;
+	word-name 2@ 2over string-eq if r> exit
+	r> word-next @ tail ;
 : dict-find ( name -- name word? ) dict @ dict-find ; 
 
 : dict-find-or-fail ( name -- name word ) dict-find
