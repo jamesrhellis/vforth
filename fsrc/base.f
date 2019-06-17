@@ -104,7 +104,7 @@ false invert con true
 	drop 1 + tail ;
 : " in-file @ dup skip-to-" dup dup c@ 
 	0 != if 1 + then in-file !
-	0 over c!
+	0 over c! swap string-dup swap
 	I_IMMW buffer-push buffer-pushw 
 	I_IMMW buffer-push buffer-pushw ; imm
 

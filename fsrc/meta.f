@@ -15,8 +15,8 @@ in io.f
 ( Find word )
 : dict-find ( name word? -- name word? ) 0 case 0 exit
 	dup >r
-	word-name 2! 2over string-eq if r> exit
-	r> word-next tail ;
+	word-name 2@ 2over string-eq if r> exit
+	r> word-next @ tail ;
 : dict-find ( name -- name word? ) dict @ dict-find ; 
 
 : dict-find-or-fail ( name -- name word ) dict-find
@@ -24,8 +24,8 @@ in io.f
 
 ( Postpone equivilent )
 : ' next-word dict-find-or-fail
-	word-code I_CALL buffer-push buffer-pushw 2drop ; 
+	word-code I_BL buffer-push buffer-pushw 2drop ; imm
 
 ( Get address of word )
 : & next-word dict-find-or-fail
-	word-code I_IMMW buffer-push buffer-pushw 2drop ; 
+	word-code I_IMMW buffer-push buffer-pushw 2drop ; imm

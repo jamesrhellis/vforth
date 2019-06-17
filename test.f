@@ -1,5 +1,6 @@
 in base.f
 in io.f
+in meta.f
 
 : test 23 24 + ;
 
@@ -20,13 +21,13 @@ load ./test_lib.so
 
 c_test
 
-: &test & c_test call ;
-&test
-
 : string-test " test!" puts ;
 string-test
 
-: num-test 2345 putx 10 putc ;
+: &test & c_test call ;
+&test
+
+: num-test 32 putx 10 putc ;
 num-test
 
 : assert-test 3 2 = " Should be equal" assert ;
