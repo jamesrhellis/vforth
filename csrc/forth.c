@@ -259,6 +259,10 @@ void add_base_words() {
 	add_word("2over", 1, (ins []){I_EOVER}); inlin();
 	add_word("rot", 1, (ins []){I_ROT}); inlin();
 	add_word("-rot", 1, (ins []){I_NROT}); inlin();
+	add_word(">a", 1, (ins []){I_TA}); inlin();
+	add_word("a>", 1, (ins []){I_FA}); inlin();
+	add_word(">b", 1, (ins []){I_TB}); inlin();
+	add_word("b>", 1, (ins []){I_FB}); inlin();
 	add_word(">r", 1, (ins []){I_TR}); inlin();
 	add_word("r>", 1, (ins []){I_FR}); inlin();
 	add_word("0", 1, (ins []){I_ZERO}); inlin();

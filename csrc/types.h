@@ -30,6 +30,9 @@ typedef struct {
 	ins *pc;
 	stack s;
 	stack ret;
+
+	reg a;
+	reg b;
 } f_state;
 
 typedef void (* syscall)(f_state *fs) ;

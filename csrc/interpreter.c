@@ -105,6 +105,23 @@ void interpret(f_state *fs) {
 			s->items[s->size - 2] = tmp;
 			break;
 
+		case I_TA:
+			fs->a = s->top;
+			s->top = s->items[--s->size];
+			break;
+		case I_FA:
+			s->items[s->size++] = s->top;
+			s->top = fs->a;
+			break;
+		case I_TB:
+			fs->b = s->top;
+			s->top = s->items[--s->size];
+			break;
+		case I_FB:
+			s->items[s->size++] = s->top;
+			s->top = fs->b;
+			break;
+
 		case I_TR:
 			ret->items[ret->size++] = ret->top;
 			ret->top = s->top;
@@ -239,8 +256,8 @@ void interpret(f_state *fs) {
 			break;
 
 		default:
-			puts("Invalid Insstruction!");
-			return;
+			puts("Invalid Instruction!");
+			exit(1);
 		}
 	}
 	*pc = p;
