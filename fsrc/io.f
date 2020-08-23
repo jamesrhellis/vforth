@@ -9,7 +9,7 @@ in base.f
 
 : puts ( string -- ) print 10 putc ;
 
-: char in-file @ dup c@ swap 1 + in-file ! 
+: char in-file @ dup c@ swap 1 + in-file !
 	I_IMM8 buffer-push buffer-push ; imm
 
 : hex-char ( no -- char ) dup 10 < if char 0 + exit
