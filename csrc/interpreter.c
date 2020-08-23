@@ -21,7 +21,11 @@ enum ins {
 int syscalls_top = 0;
 syscall syscalls[1024] = {0};
 
-void interpret(STATE) {
+void interpret(f_state *fs) {
+	stack *s = &fs->s;
+	stack *ret = &fs->ret;
+	ins **pc = &fs->pc;
+
 	int base = ret->size;
 	reg tmp = 0, tmp2 = 0;
 	ins *p = *pc;
@@ -30,9 +34,15 @@ void interpret(STATE) {
 		case I_SYS:
 			tmp = 0;
 			memcpy(&tmp, p, 2);
-			p += 2;
 
-			syscalls[tmp](&p, s, ret);
+			ret->items[ret->size++] = ret->top;
+			ret->top = (reg)(p + 2);
+			*pc = p + 2;
+
+			syscalls[tmp](fs);
+
+			p = (ins *)ret->top;
+			ret->top = ret->items[--ret->size];
 
 			break;
 		case I_ADD:
@@ -142,8 +152,7 @@ void interpret(STATE) {
 			*(uint8_t *)s->top = s->items[--s->size];
 			s->top = s->items[--s->size];
 			break;
-			
-			
+
 		case I_GT:
 			s->items[s->size++] = s->top;
 			s->top = s->items[s->size - 1] < s->items[s->size - 2] ? ~((reg)0) : 0;
@@ -230,7 +239,8 @@ void interpret(STATE) {
 			break;
 
 		default:
-			break;
+			puts("Invalid Insstruction!");
+			return;
 		}
 	}
 	*pc = p;
@@ -247,10 +257,8 @@ int main(int argn, char ** args) {
 
 	forth_init();
 
-	stack s = {0};
-	stack ret = {0};
-	ins *pc = NULL;
-	interpreter(&pc, &s, &ret);
+	f_state fs = {0};
+	interpreter(&fs);
 
 	free_words();
 	free(mem);

@@ -26,6 +26,11 @@ static inline reg stack_pop(stack *s) {
 	return tmp;
 }
 
-#define STATE ins **pc, stack *s, stack *ret
-typedef void (* syscall)(STATE) ;
+typedef struct {
+	ins *pc;
+	stack s;
+	stack ret;
+} f_state;
+
+typedef void (* syscall)(f_state *fs) ;
 typedef void (* syscall_register)(char *name, syscall) ;

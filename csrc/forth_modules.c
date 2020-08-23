@@ -15,7 +15,7 @@ int module_find(char *file_name) {
 	return 0;
 }
 
-char *strdup(char *string) {
+char *strdup(const char *string) {
 	size_t l = strlen(string) + 1;
 	char *dup = malloc(l);
 	memcpy(dup, string, l);
@@ -38,14 +38,14 @@ int module_find_add(char *file_name) {
 	return 0;
 }
 
-int load_forth_file(char *file_name, STATE) {
+int load_forth_file(char *file_name, f_state *fs) {
 	if (module_find_add(file_name)) {
 		return 1;
 	}
 	char *bfile = file, *bmem = mem;
 	load_file(file_name);
 
-	interpreter(pc, s, ret);
+	interpreter(fs);
 
 	free(mem);
 	file = bfile;
@@ -54,11 +54,11 @@ int load_forth_file(char *file_name, STATE) {
 	return 0;
 }
 
-void finclude(STATE) {
+void finclude(f_state *fs) {
 	char *fname = next_word();
 	char buffer[256] = "./fsrc/";
 	strcat(buffer + strlen(buffer), fname);
-	load_forth_file(buffer, pc, s, ret);
+	load_forth_file(buffer, fs);
 }
 
 #include <dlfcn.h>
@@ -80,9 +80,8 @@ int load_binary_module(char *file_name) {
 	((void (*)(void(*)(char *, syscall)))lib_init)(add_syscall);
 	return 0;
 }
-	
 
-void flibload(STATE) {
+void flibload(f_state *fs) {
 	char *fname = next_word();
 	load_binary_module(fname);
 }

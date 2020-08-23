@@ -80,7 +80,7 @@ int load_file(char *file_name) {
 	fclose(f);
 	return 0;
 }
-	
+
 char *next_word(void) {
 	if (!file || !*file) {
 		return NULL;
@@ -116,7 +116,7 @@ void imm(void) {
 size_t pos;
 ins buffer[1024];
 
-void colon(STATE) {
+void colon(f_state *fs) {
 	pos = 0;
 	char *name = next_word();
 	char *c;
@@ -128,8 +128,8 @@ void colon(STATE) {
 		word *w = find_word(c);
 		if (w) {
 			if (w->flags & W_IMMIDIATE) {
-				*pc = w->code;
-				interpret(pc, s, ret);
+				fs->pc = w->code;
+				interpret(fs);
 			} else if (w->flags & W_INLINE) {
 				memcpy(&buffer[pos], &w->code, w->len);
 				pos += w->len;
@@ -161,13 +161,13 @@ void colon(STATE) {
 
 void *var_space[3];
 
-void interpreter(STATE) {
+void interpreter(f_state *fs) {
 	char *c;
 	while((c = next_word())) {
 		word *w = find_word(c);
 		if (w) {
-			*pc = w->code;
-			interpret(pc, s, ret);
+			fs->pc = w->code;
+			interpret(fs);
 		} else {
 			char *end = NULL;
 			size_t l = strtol(c, &end, 0);
@@ -175,47 +175,46 @@ void interpreter(STATE) {
 				fprintf(stderr, "Unknown word: %s\n", c);
 				exit(-1);
 			} else {
-				stack_push(s, l);
-				
+				stack_push(&fs->s, l);
 			}
 		}
 	}
 }
 
-void falloc(STATE) {
-	size_t len = stack_pop(s);
+void falloc(f_state *fs) {
+	size_t len = stack_pop(&fs->s);
 	void *m = calloc(1, len);
-	stack_push(s, ((size_t)m) + len);
-	stack_push(s, (size_t) m);
+	stack_push(&fs->s, ((size_t)m) + len);
+	stack_push(&fs->s, (size_t) m);
 }
 
-void ffree(STATE) {
-	free((void *)stack_pop(s));
+void ffree(f_state *fs) {
+	free((void *)stack_pop(&fs->s));
 }
 
-void print_stack(STATE) {
-	printf("%x, ", s->top); 
-	for (int i = s->size -1;i >= 0;--i) {
-		printf("%x, ", s->items[i]); 
+void print_stack(f_state *fs) {
+	printf("%x, ", fs->s.top);
+	for (int i = fs->s.size -1;i >= 0;--i) {
+		printf("%x, ", fs->s.items[i]);
 	}
 	puts("");
 }
 
-void fexit(STATE) {
-	exit(stack_pop(s));
+void fexit(f_state *fs) {
+	exit(stack_pop(&fs->s));
 }
 
-void fputchar(STATE) {
-	putc(stack_pop(s), stdout);
+void fputchar(f_state *fs) {
+	putc(stack_pop(&fs->s), stdout);
 }
-void fgetchar(STATE) {
-	stack_push(s, getc(stdin));
+void fgetchar(f_state *fs) {
+	stack_push(&fs->s, getc(stdin));
 }
 
 void add_syscall(char *name, syscall s) {
 	int no = syscalls_top++;
 	syscalls[no] = s;
-	add_word(name, 3, (ins []) {I_SYS, no & 0xF, (no >> 8) & 0xF}); 
+	add_word(name, 3, (ins []) {I_SYS, no & 0xF, (no >> 8) & 0xF});
 }
 
 #include "forth_modules.c"

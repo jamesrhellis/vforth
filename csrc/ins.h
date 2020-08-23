@@ -1,3 +1,5 @@
+I(I_ERR),
+
 I(I_SYS),// Perform a call to hosting environment
 // Arithmetic
 I(I_ADD),
@@ -16,6 +18,10 @@ I(I_DUP),
 I(I_ROT),
 I(I_NROT),
 
+I(I_TA),
+I(I_FA),
+I(I_TB),
+I(I_FB),
 I(I_TR),
 I(I_FR),
 
