@@ -4,8 +4,7 @@ in base.f
 
 ( Printing functions )
 
-: print ( string -- ) 2dup <= if 2drop exit
-	dup c@ putc 1 + tail ;
+: print ( string -- ) dup c@ 0 case exit putc 1 + tail ;
 
 : puts ( string -- ) print 10 putc ;
 
@@ -24,4 +23,4 @@ in base.f
 : putx ( number -- ) 8 w putx ;
 
 ( Testing facilities )
-: assert ( cond string ) rot 0 = if puts 1 terminate then ;
+: assert ( cond string ) swap 0 = if puts 1 terminate then ;

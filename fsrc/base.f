@@ -31,9 +31,9 @@
 : skip-non-space dup c@ is-not-space if 1 + tail then ;
 
 : next-word skip-space dup skip-non-space ;
-: next-word in-file @ next-word dup
-	c@ 0 = if dup in-file ! 1 + swap exit
-	0 over c! 1 + dup in-file ! swap ;
+: next-word in-file @ next-word
+	dup c@ 0 = if in-file ! exit
+	0 over c! 1 + in-file ! ;
 
 : buffer-pushn dup 0 = if drop drop exit
 	>r dup buffer-push 8 rshift
@@ -43,18 +43,20 @@
 	1 + 2dup <= if 2drop 2drop exit
 	2swap 1 + 2dup <= if 2drop 2drop exit 2swap tail ;
 
-: string-dup 2dup - alloc 2over 2over memcpy 2swap 2drop ;
-: word next-word string-dup swap
-	I_IMMW buffer-push buffer-pushw
+: string-end dup c@
+	0 = if 1 + exit
+	1 + tail ;
+: string-end dup string-end ;
+
+: string-dup string-end swap 2dup - alloc 2over 2over memcpy 2swap 2drop swap drop ;
+: word next-word string-dup
 	I_IMMW buffer-push buffer-pushw ; imm
 
-: head-neq dup c@ >r 2swap dup c@ r> != ;
+: head-neq dup c@ >r over c@ r> != ;
 : string-eq
-	head-neq if 2drop 2drop 0 exit
-	1 + 2dup <= if 2drop 2drop 1 exit
-	2swap 1 + tail ;
-: string-eq 2over - >r 2dup - r> != if 2drop 2drop 0 exit
-	 string-eq ;
+	head-neq if drop drop 0 exit
+	1 + dup c@ 0 = if drop 1 + c@ 0 = exit
+	swap 1 + tail ;
 
 : ( word ) next-word string-eq if exit tail ; imm
 
@@ -86,7 +88,7 @@ var-buffer-alloc
 	1 + dup >r 1 w n-write I_RET r> 1 w + c! ;
 
 : var-word ( value name -- ) 7 6 w + alloc dup >r
-	1 w + 2! ( name )
+	1 w + ! ( name )
 	r> 1 1 w + over 3 w + ! ( len )
 	swap over 5 w + immw-write  ( code )
 	dict @ over ! dict ! inline ;
@@ -104,7 +106,6 @@ false invert con true
 	drop 1 + tail ;
 : " in-file @ dup skip-to-" dup dup c@
 	0 != if 1 + then in-file !
-	0 over c! swap string-dup swap
-	I_IMMW buffer-push buffer-pushw
+	0 swap c! string-dup
 	I_IMMW buffer-push buffer-pushw ; imm
 
