@@ -210,11 +210,20 @@ void fputchar(f_state *fs) {
 void fgetchar(f_state *fs) {
 	stack_push(&fs->s, getc(stdin));
 }
+void f_puts(f_state *fs) {
+	puts((char *)stack_pop(&fs->s));
+}
 
 void add_syscall(char *name, syscall s) {
 	int no = syscalls_top++;
 	syscalls[no] = s;
 	add_word(name, 3, (ins []) {I_SYS, no & 0xF, (no >> 8) & 0xF});
+}
+
+void add_ptr_lit(char *name, void *lit) {
+	ins tmp[1 + sizeof(size_t)] = {I_IMMW};
+	memcpy(&tmp[1], &lit, sizeof(size_t));
+	add_word(name, 1 + sizeof(size_t), tmp);
 }
 
 #include "forth_modules.c"
@@ -229,6 +238,7 @@ void add_syscalls() {
 	add_syscall("terminate", fexit);
 	add_syscall("putc", fputchar);
 	add_syscall("getc", fgetchar);
+	add_syscall("puts", f_puts);
 }
 
 int size_pow(int n) {
@@ -285,22 +295,11 @@ void add_base_words() {
 	}
 
 	// Forth interpreter state interaction
-	ins tmp[1 + sizeof(size_t)] = {I_IMMW};
-	void *ptmp = &pos;
-	memcpy(&tmp[1], &ptmp, sizeof(size_t));
-	add_word("buffer-pos", 1 + sizeof(size_t), tmp);
-	ptmp = &buffer;
-	memcpy(&tmp[1], &ptmp, sizeof(size_t));
-	add_word("buffer-items", 1 + sizeof(size_t), tmp);
-	ptmp = &dict;
-	memcpy(&tmp[1], &ptmp, sizeof(size_t));
-	add_word("dict", 1 + sizeof(size_t), tmp);
-	ptmp = &file;
-	memcpy(&tmp[1], &ptmp, sizeof(size_t));
-	add_word("in-file", 1 + sizeof(size_t), tmp);
-	ptmp = &var_space;
-	memcpy(&tmp[1], &ptmp, sizeof(size_t));
-	add_word("var-space", 1 + sizeof(size_t), tmp);
+	add_ptr_lit("buffer-pos", &pos);
+	add_ptr_lit("buffer-items", &buffer);
+	add_ptr_lit("dict", &dict);
+	add_ptr_lit("in-file", &file);
+	add_ptr_lit("var-space", &var_space);
 }
 
 void forth_init(void) {

@@ -77,7 +77,7 @@ int load_binary_module(char *file_name) {
 		fprintf(stderr, "Unable to initialise lib %s;\n %s\n", lib, dlerror());
 		return 2;
 	}
-	((void (*)(void(*)(char *, syscall)))lib_init)(add_syscall);
+	((void (*)(void(*)(char *, syscall), void(*)(char *, void *)))lib_init)(add_syscall, add_ptr_lit);
 	return 0;
 }
 

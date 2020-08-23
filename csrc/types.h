@@ -35,5 +35,6 @@ typedef struct {
 	reg b;
 } f_state;
 
-typedef void (* syscall)(f_state *fs) ;
-typedef void (* syscall_register)(char *name, syscall) ;
+typedef void (* syscall)(f_state *fs);
+typedef void (* syscall_register)(char *name, syscall);
+typedef void (* literal_register)(char *name, void *lit);
